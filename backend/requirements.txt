@@ -1,0 +1,16 @@
+# FastAPI核心依赖
+fastapi
+uvicorn
+pydantic
+
+# E2B Desktop依赖
+e2b-desktop
+
+# Browser Use AI依赖
+# browser-use  # 可能需要从GitHub安装: git+https://github.com/browser-use/browser-use.git
+selenium  # 备选方案
+playwright
+openai
+
+# CORS支持
+python-multipart
