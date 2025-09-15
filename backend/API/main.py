@@ -20,7 +20,7 @@ app = FastAPI(
 # CORS设置，允许前端访问
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3100", "http://127.0.0.1:3100"],  # Next.js默认端口
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],  # Next.js默认端口
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -60,4 +60,4 @@ async def root():
     }
 
 if __name__ == "__main__":
-    uvicorn.run("API.main:app", host="0.0.0.0", port=8100, reload=True)
+    uvicorn.run("API.main:app", host="0.0.0.0", port=8000, reload=True)
