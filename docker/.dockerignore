@@ -1,0 +1,15 @@
+# Exclude development and build files
+node_modules/
+.next/
+.git/
+.gitignore
+*.log
+.vscode/
+.idea/
+
+# Exclude documentation
+*.md
+!README.md
+
+# Include startup script
+!start.sh

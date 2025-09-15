@@ -1,78 +1,92 @@
-# Multi-stage Dockerfile for Fullstack FrankStyle Template
-FROM node:18-alpine AS frontend
+# 多阶段构建 Dockerfile - 前后端统一构建
 
-# Set working directory for frontend
-WORKDIR /app/frontend
+# ==================== 后端构建阶段 ====================
+FROM python:3.11-slim AS backend-builder
 
-# Copy frontend package files
-COPY frontend/package*.json ./
+# 设置工作目录
+WORKDIR /app/backend
 
-# Install frontend dependencies
-RUN npm install
+# 设置环境变量
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
-# Copy frontend source code
-COPY frontend/ ./
-
-# Build frontend application
-RUN npm run build
-
-# Backend Python stage
-FROM python:3.11-slim AS backend
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    curl \
-    make \
+# 安装系统依赖
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        gcc \
+        g++ \
+        gfortran \
+        liblapack-dev \
+        libblas-dev \
+        libgcc-s1 \
     && rm -rf /var/lib/apt/lists/*
 
-# Set working directory
-WORKDIR /app
+# 安装 Python 依赖
+COPY backend/requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
 
-# Copy backend requirements and install Python dependencies
-COPY backend/requirements.txt ./backend/
-RUN pip install --no-cache-dir -r backend/requirements.txt
+# ==================== 前端构建阶段 ====================
+FROM node:18-alpine AS frontend-builder
 
-# Final production stage
+# 设置工作目录
+WORKDIR /app/frontend
+
+# 安装依赖
+RUN apk add --no-cache libc6-compat
+
+# 复制 package 文件并安装依赖（包含开发依赖，用于构建）
+COPY frontend/package*.json ./
+RUN npm ci && npm cache clean --force
+
+# 复制前端代码并构建
+COPY frontend/ .
+RUN npm run build
+
+# ==================== 生产环境镜像 ====================
 FROM python:3.11-slim AS production
 
-# Install system dependencies including Node.js
-RUN apt-get update && apt-get install -y \
-    curl \
-    make \
+# 设置工作目录
+WORKDIR /app
+
+# 安装 Node.js 和 make（用于运行前端和构建工具）
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        curl \
+        gcc \
+        g++ \
+        gfortran \
+        liblapack-dev \
+        libblas-dev \
+        libgcc-s1 \
+        make \
     && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-# Set working directory
-WORKDIR /app
+# 从后端构建阶段复制 Python 依赖
+COPY --from=backend-builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=backend-builder /usr/local/bin /usr/local/bin
 
-# Copy Python dependencies from backend stage
-COPY --from=backend /usr/local/lib/python3.11/site-packages/ /usr/local/lib/python3.11/site-packages/
-COPY --from=backend /usr/local/bin/ /usr/local/bin/
-
-# Copy built frontend from frontend stage
-COPY --from=frontend /app/frontend/.next ./frontend/.next
-COPY --from=frontend /app/frontend/public ./frontend/public
-COPY --from=frontend /app/frontend/package*.json ./frontend/
-COPY --from=frontend /app/frontend/next.config.ts ./frontend/
-COPY --from=frontend /app/frontend/node_modules ./frontend/node_modules
-
-# Copy backend source
+# 复制后端代码
 COPY backend/ ./backend/
 
-# Copy Makefile
-COPY Makefile ./
+# 从前端构建阶段复制构建产物和依赖 (传统方式)
+COPY --from=frontend-builder /app/frontend/.next ./frontend/.next
+COPY --from=frontend-builder /app/frontend/package.json ./frontend/package.json
+COPY --from=frontend-builder /app/frontend/public ./frontend/public
+COPY --from=frontend-builder /app/frontend/node_modules ./frontend/node_modules
 
-# Set environment variables
-ENV NODE_ENV=production
+# 复制启动脚本
+COPY start.sh ./
+RUN chmod +x start.sh
+
+# 暴露端口
+EXPOSE 3100 8100
+
+# 设置环境变量
 ENV PYTHONPATH=/app/backend
+ENV NODE_ENV=production
 
-# Expose ports
-EXPOSE 3000 8000
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:8000/api/health && curl -f http://localhost:3000 || exit 1
-
-# Use make prod-docker as the command (for container internal use)
-CMD ["make", "prod"]
+# 启动命令
+CMD ["./start.sh"]
