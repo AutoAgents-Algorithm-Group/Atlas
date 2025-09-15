@@ -7,6 +7,8 @@ import ssl
 from e2b_desktop import Sandbox
 
 
+os.environ["E2B_API_KEY"] = "e2b_c6bbe444d963e8db1dc680d8a45a35cc13e0e47e"
+
 class E2BDesktopManager:
     """
     负责 E2B 桌面：创建沙盒、开启直播、在沙盒里启动可见的 Chrome（CDP:9222），
@@ -31,10 +33,17 @@ class E2BDesktopManager:
         self.desk: Sandbox | None = None
         self.live_url: str | None = None
         self.chrome_bin: str | None = None
+        # E2B API密钥
+        self.api_key = "e2b_c6bbe444d963e8db1dc680d8a45a35cc13e0e47e"
 
     def start_desktop(self):
         """创建沙盒并开启直播（返回直播URL）。"""
-        self.desk = Sandbox.create(resolution=self.resolution, dpi=self.dpi, timeout=60000)
+        self.desk = Sandbox.create(
+            api_key=self.api_key,
+            resolution=self.resolution, 
+            dpi=self.dpi, 
+            timeout=60000
+        )
         self.desk.stream.start(require_auth=True)
         self.live_url = self.desk.stream.get_url(auth_key=self.desk.stream.get_auth_key())
         print("\n=== 桌面直播地址（可观看整个过程） ===")
