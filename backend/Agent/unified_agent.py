@@ -21,7 +21,6 @@ class E2BUnifiedAgent:
         self.external_cdp_base = None
         self.backup_chrome_base = None
         self._initialized = False
-        self._taken_over = False  # Take Over 状态
         self._temp_files = []  # 跟踪browser-use agent生成的临时文件
     
     def create_desktop_session(self):
@@ -87,53 +86,6 @@ class E2BUnifiedAgent:
         """获取当前的stream URL (兼容原API)"""
         return self.stream_url
     
-    def take_over_desktop(self):
-        """接管桌面控制权"""
-        try:
-            if not self.stream_url:
-                return {
-                    "success": False,
-                    "error": "No active session",
-                    "message": "Please create a desktop session first"
-                }
-            
-            if not self._initialized:
-                return {
-                    "success": False,
-                    "error": "Browser Use not initialized",
-                    "message": "Browser Use未初始化，无法接管桌面"
-                }
-            
-            self._taken_over = True
-            return {
-                "success": True,
-                "message": "Desktop control taken over successfully",
-                "taken_over": True
-            }
-            
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e),
-                "message": f"Failed to take over desktop: {str(e)}"
-            }
-    
-    def release_desktop(self):
-        """释放桌面控制权"""
-        try:
-            self._taken_over = False
-            return {
-                "success": True,
-                "message": "Desktop control released successfully",
-                "taken_over": False
-            }
-            
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e),
-                "message": f"Failed to release desktop: {str(e)}"
-            }
     
     def get_desktop_status(self):
         """获取桌面状态"""
@@ -141,7 +93,6 @@ class E2BUnifiedAgent:
             "success": True,
             "active": bool(self.stream_url),
             "initialized": self._initialized,
-            "taken_over": self._taken_over,
             "stream_url": self.stream_url
         }
     
@@ -169,13 +120,6 @@ class E2BUnifiedAgent:
                     "success": False,
                     "error": "Browser Use not initialized", 
                     "message": "端口配置有问题，请检查E2B控制台中端口9222和9223是否设置为Public，或者重新创建会话"
-                }
-            
-            if not self._taken_over:
-                return {
-                    "success": False,
-                    "error": "Desktop not taken over",
-                    "message": "请先点击 'Take Over' 按钮来接管桌面控制权"
                 }
             
             # 确保有可用的CDP端点
@@ -621,7 +565,6 @@ class E2BUnifiedAgent:
                 # 重置状态但保留沙盒实例
                 self.stream_url = None
                 self._initialized = False
-                self._taken_over = False
                 
                 return {"success": True, "message": "Desktop session paused (sandbox preserved)"}
             else:
@@ -667,7 +610,6 @@ class E2BUnifiedAgent:
                 self.desktop_manager.desk = None
                 self.stream_url = None
                 self._initialized = False
-                self._taken_over = False
                 # 清空临时文件列表
                 self._temp_files = []
                 return {"success": True, "message": "Desktop session destroyed"}

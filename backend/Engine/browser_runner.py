@@ -15,9 +15,9 @@ class BrowseUseRunner:
         self.task = task
         self.external_cdp_base = external_cdp_base.rstrip("/")
         self.backup_chrome_base = backup_chrome_base.rstrip("/") if backup_chrome_base else None
-        self.model = model or os.getenv("BROWSER_USE_MODEL", "gpt-4.1-mini")
+        self.model = model or os.getenv("BROWSER_USE_MODEL", "gemini-2.5-pro")
         self.base_url = os.getenv("OPENAI_BASE_URL", "https://api.tu-zi.com/v1")
-        self.api_key = os.getenv("OPENAI_API_KEY", "sk-wyEhWuKsfARrFkATfhFPf2VfzJZxBP2MUTZb86VoG9whTlkQ")
+        self.api_key = os.getenv("OPENAI_API_KEY", "sk-9mRo0HPml7rUWwpQsal5Ve7CWx65Q7gxkF95a6QLxzfXarKi")
 
     @staticmethod
     def _http_get(url: str, timeout: int = 10) -> str:
@@ -136,7 +136,10 @@ class BrowseUseRunner:
         )
         
         # 创建Browser实例，使用稳定的基础配置
-        browser = Browser(cdp_url=ws)
+        browser = Browser(
+            cdp_url=ws,
+            devtools=False
+        )
         agent = Agent(
             task=self.task, 
             llm=llm, 

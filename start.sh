@@ -28,7 +28,7 @@ trap cleanup SIGTERM SIGINT
 
 # 启动后端API服务器
 echo -e "${GREEN}⚙️  启动后端API服务器...${NC}"
-cd /app/backend && python -m uvicorn api.main:app --host 0.0.0.0 --port 8100 --timeout-keep-alive 300 &
+cd /app/backend && python -m uvicorn API.main:app --host 0.0.0.0 --port 8100 --timeout-keep-alive 300 &
 BACKEND_PID=$!
 
 # 等待后端启动

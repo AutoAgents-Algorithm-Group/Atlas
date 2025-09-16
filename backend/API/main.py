@@ -20,7 +20,12 @@ app = FastAPI(
 # CORS设置，允许前端访问
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3100", "http://127.0.0.1:3100"],  # Next.js默认端口
+    allow_origins=[
+        "http://localhost:3100", 
+        "http://127.0.0.1:3100", 
+        "http://45.78.224.30:3100", 
+        "https://atlas.agentspro.cn"
+    ],  # Next.js默认端口
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

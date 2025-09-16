@@ -44,7 +44,6 @@ async def get_session_status():
             "success": status["success"],
             "active": status["active"],
             "initialized": status["initialized"],
-            "taken_over": status["taken_over"],
             "stream_url": status["stream_url"],
             "message": "Session is active" if status["active"] else "No active session"
         }
@@ -53,7 +52,6 @@ async def get_session_status():
             "success": False,
             "active": False,
             "initialized": False,
-            "taken_over": False,
             "message": f"Error checking status: {str(e)}"
         }
 

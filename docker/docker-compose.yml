@@ -15,7 +15,7 @@ services:
       - NODE_ENV=production
       - PYTHONPATH=/app/backend
       - NEXT_PUBLIC_API_URL=https://atlas-backend.agentspro.cn
-      - CORS_ORIGINS=https://atlas.agentspro.cn, http://45.78.224.30:3100, http://localhost:3100, http://127.0.0.1:3100
+      - CORS_ORIGINS=https://atlas.agentspro.cn,http://45.78.224.30:3100,http://localhost:3100,http://127.0.0.1:3100
     volumes:
       - ../assets:/app/assets:ro
     restart: unless-stopped
