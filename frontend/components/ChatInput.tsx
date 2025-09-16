@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
 interface ChatInputProps {
   currentMessage: string;
@@ -24,6 +25,7 @@ export default function ChatInput({
   isInitialized,
   quickMessages
 }: ChatInputProps) {
+  const t = useTranslations();
   const [isHovering, setIsHovering] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -63,7 +65,7 @@ export default function ChatInput({
       {/* 快捷消息按钮 */}
       {isActive && isInitialized && !isSending && (
         <div className="mb-3">
-          <p className="text-xs text-gray-500 mb-2">Quick actions:</p>
+          <p className="text-xs text-gray-500 mb-2">{t('chat.quickActions')}</p>
           <div className="flex flex-wrap gap-2">
             {quickMessages.map((msg, index) => (
               <Button
@@ -92,8 +94,8 @@ export default function ChatInput({
                 onKeyDown={handleKeyDown}
                 placeholder={
                   !isActive || !isInitialized 
-                    ? "Start a session first to begin chatting"
-                    : "Plan, search, and execute anything"
+                    ? t('chat.startSessionFirst')
+                    : t('chat.planAndExecute')
                 }
                 className="w-full bg-transparent border-none focus:outline-none text-gray-700 text-sm placeholder-gray-400 resize-none overflow-y-auto"
                 disabled={isDisabled}
@@ -137,7 +139,7 @@ export default function ChatInput({
 
       {/* 提示文本 */}
       <p className="text-xs text-gray-500 mt-2 text-center">
-        Agent sometimes takes a while to respond. Please be patient.
+        {t('chat.agentPatience')}
       </p>
     </div>
   );

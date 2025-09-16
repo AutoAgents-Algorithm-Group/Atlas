@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
+import { useTranslations } from 'next-intl';
 import ChatHeader from '@/components/ChatHeader';
 import ChatArea from '@/components/ChatArea';
 import ChatInput from '@/components/ChatInput';
@@ -35,6 +36,8 @@ interface SandboxFile {
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8100';
 
 export default function ChatPage() {
+  const t = useTranslations();
+  
   // 会话状态
   const [isCreatingSession, setIsCreatingSession] = useState(false);
   // const [isClosingSession, setIsClosingSession] = useState(false); // Removed as no longer needed
@@ -76,7 +79,7 @@ export default function ChatPage() {
       }
     } catch (error) {
       console.error('Failed to check session status:', error);
-      toast.error('Failed to connect to backend');
+      toast.error(t('messages.backendConnectFailed'));
     }
   };
 
@@ -98,13 +101,13 @@ export default function ChatPage() {
         setStreamUrl(data.stream_url);
         setIsActive(true);
         setIsInitialized(true);
-        toast.success('Browser session created successfully!');
+        toast.success(t('messages.sessionCreatedSuccess'));
       } else {
-        toast.error(data.error || 'Failed to create session');
+        toast.error(data.error || t('messages.backendConnectFailed'));
       }
     } catch (error) {
       console.error('Error creating session:', error);
-      toast.error('Failed to connect to backend');
+      toast.error(t('messages.backendConnectFailed'));
     } finally {
       setIsCreatingSession(false);
     }
@@ -126,14 +129,14 @@ export default function ChatPage() {
       if (data.success) {
         setStreamUrl(data.stream_url);
         setIsActive(true);
-        toast.success('Session resumed successfully');
+        toast.success(t('messages.sessionResumedSuccess'));
         await checkSessionStatus(); // 重新检查状态
       } else {
-        toast.error(data.error || 'Failed to resume session');
+        toast.error(data.error || t('messages.backendConnectFailed'));
       }
     } catch (error) {
       console.error('Error resuming session:', error);
-      toast.error('Failed to connect to backend');
+      toast.error(t('messages.backendConnectFailed'));
     } finally {
       setIsCreatingSession(false);
     }
@@ -144,12 +147,12 @@ export default function ChatPage() {
   // 发送消息
   const sendMessage = async () => {
     if (!currentMessage.trim()) {
-      toast.error('Please enter a message');
+      toast.error(t('messages.enterMessage'));
       return;
     }
 
     if (!isActive || !isInitialized) {
-      toast.error('Please create a session first');
+      toast.error(t('messages.createSessionFirst'));
       return;
     }
 
@@ -193,13 +196,13 @@ export default function ChatPage() {
       );
       
       if (data.success) {
-        toast.success('Task completed successfully');
+        toast.success(t('messages.taskCompletedSuccess'));
         // Update step tracking
         setCurrentCommand(message);
         setTotalSteps(chatHistory.length + 1);
         setCurrentStep(chatHistory.length + 1);
       } else {
-        toast.error(data.error || 'Task execution failed');
+        toast.error(data.error || t('messages.taskExecutionFailed'));
       }
       
     } catch (error) {
@@ -207,11 +210,11 @@ export default function ChatPage() {
       setChatHistory(prev => 
         prev.map(msg => 
           msg.id === messageId 
-            ? { ...msg, response: 'Failed to connect to backend', success: false }
+            ? { ...msg, response: t('messages.backendConnectFailed'), success: false }
             : msg
         )
       );
-      toast.error('Failed to connect to backend');
+      toast.error(t('messages.backendConnectFailed'));
     } finally {
       setIsSending(false);
     }
@@ -311,24 +314,18 @@ export default function ChatPage() {
         a.click();
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
-        toast.success(`Downloaded ${file.name}`);
+        toast.success(t('messages.downloadSuccess', { filename: file.name }));
       } else {
-        toast.error('Failed to download file');
+        toast.error(t('messages.downloadFailed'));
       }
     } catch (error) {
       console.error('Error downloading file:', error);
-      toast.error('Failed to download file');
+      toast.error(t('messages.downloadFailed'));
     }
   };
 
   // 预设消息
-  const quickMessages = [
-    "打开 Google 并搜索人工智能",
-    "访问 GitHub 并浏览热门项目",
-    "打开淘宝搜索手机",
-    "访问百度并搜索今天的新闻",
-    "打开 YouTube 并搜索编程教程"
-  ];
+  const quickMessages = t.raw('quickMessages') as string[];
 
   // 页面加载时检查状态并暂停会话
   useEffect(() => {

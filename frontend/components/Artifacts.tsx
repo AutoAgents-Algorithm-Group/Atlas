@@ -15,6 +15,7 @@ import {
   SkipForward
 } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { useTranslations } from 'next-intl';
 
 interface ArtifactsProps {
   streamUrl: string;
@@ -47,6 +48,7 @@ export default function Artifacts({
   handlePreviousStep,
   handleNextStep
 }: ArtifactsProps) {
+  const t = useTranslations();
   const [isTaskProgressOpen, setIsTaskProgressOpen] = useState(false);
   
   // Mock task list for demo
@@ -68,10 +70,10 @@ export default function Artifacts({
   
   // 根据当前状态动态显示工具
   const getToolStatus = () => {
-    if (!isActive) return "Waiting";
-    if (streamUrl && isInitialized) return "Browser";
-    if (isInitialized) return "Ready";
-    return "Starting...";
+    if (!isActive) return t('common.waiting');
+    if (streamUrl && isInitialized) return t('artifacts.browser');
+    if (isInitialized) return t('common.ready');
+    return t('common.loading');
   };
 
   return (
@@ -80,7 +82,7 @@ export default function Artifacts({
         {/* Header */}
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-lg">Atlas's Computer</CardTitle>
+            <CardTitle className="text-lg">{t('artifacts.computerTitle')}</CardTitle>
             
             {/* 会话控制按钮 */}
             <div className="flex gap-2">
@@ -94,7 +96,7 @@ export default function Artifacts({
                 ) : (
                   <Play className="h-4 w-4 mr-1" />
                 )}
-                Start Session
+                {t('artifacts.startSession')}
               </Button>
             </div>
           </div>
@@ -104,18 +106,24 @@ export default function Artifacts({
         <div className="px-6 pb-3">
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <Computer className="h-4 w-4" />
-            <span>Atlas is using <strong>{getToolStatus()}</strong></span>
+            <span>
+              {getToolStatus() === t('common.waiting') ? (
+                <strong>{getToolStatus()}</strong>
+              ) : (
+                <>{t('artifacts.atlasUsing')} <strong>{getToolStatus()}</strong></>
+              )}
+            </span>
           </div>
           {currentUrl && (
             <div className="flex items-center gap-2 text-xs text-gray-500 mt-1 bg-[#f7f7f7] rounded-2xl p-2">
               <Globe className="h-3 w-3" />
-              <span>Browsing {currentUrl}</span>
+              <span>{t('artifacts.browsing')} {currentUrl}</span>
             </div>
           )}
           {(currentCommand || currentFilePath) && (
             <div className="mt-2 p-2 bg-blue-50 rounded text-xs text-blue-700">
-              {currentCommand && <div><strong>Command:</strong> {currentCommand}</div>}
-              {currentFilePath && <div><strong>File:</strong> {currentFilePath}</div>}
+              {currentCommand && <div><strong>{t('artifacts.command')}:</strong> {currentCommand}</div>}
+              {currentFilePath && <div><strong>{t('artifacts.file')}:</strong> {currentFilePath}</div>}
             </div>
           )}
         </div>
@@ -131,7 +139,7 @@ export default function Artifacts({
                 <div className="w-3 h-3 bg-green-500 rounded-full"></div>
               </div>
               <span className="flex-1 text-center font-mono text-xs">
-                {currentBrowserUrl || currentFilePath || (streamUrl ? "Loading..." : "No page loaded")}
+                {currentBrowserUrl || currentFilePath || (streamUrl ? t('artifacts.loading') : t('artifacts.noPageLoaded'))}
               </span>
             </div>
           </div>
@@ -150,10 +158,10 @@ export default function Artifacts({
                 <div className="text-center text-gray-500">
                   <Computer className="h-16 w-16 mx-auto mb-4 text-gray-300" />
                   <h3 className="text-lg font-medium mb-2">
-                    {isActive ? 'Browser Ready' : 'No session active'}
+                    {isActive ? t('artifacts.browserReady') : t('artifacts.noSessionActive')}
                   </h3>
                   <p className="text-sm">
-                    {isActive ? 'Browser is ready to use' : 'Start a session to see the desktop'}
+                    {isActive ? t('artifacts.browserReadyToUse') : t('artifacts.startSessionDesktop')}
                   </p>
                 </div>
               </div>
@@ -212,7 +220,7 @@ export default function Artifacts({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <span className="text-sm font-medium text-gray-700">
-                        Task progress
+                        {t('artifacts.taskProgress')}
                       </span>
                       <span className="text-sm text-gray-500">
                         {Math.min(currentStep, taskList.length)} / {taskList.length}

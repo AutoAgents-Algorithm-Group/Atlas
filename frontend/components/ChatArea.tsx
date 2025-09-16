@@ -3,6 +3,7 @@
 import { useRef, useEffect } from 'react';
 import { Bot, Loader2 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useTranslations } from 'next-intl';
 
 interface ChatMessage {
   id: string;
@@ -26,6 +27,7 @@ interface ChatAreaProps {
 }
 
 export default function ChatArea({ chatHistory, isSending }: ChatAreaProps) {
+  const t = useTranslations();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // 滚动到底部
@@ -43,7 +45,7 @@ export default function ChatArea({ chatHistory, isSending }: ChatAreaProps) {
         {chatHistory.length === 0 ? (
           <div className="text-center text-gray-500 mt-70">
             <div className="max-w-md mx-auto">
-              <h3 className="text-lg font-medium mb-2">Welcome to Atlas</h3>
+              <h3 className="text-lg font-medium mb-2">{t('chat.welcome')}</h3>
             </div>
           </div>
         ) : (
@@ -89,7 +91,7 @@ export default function ChatArea({ chatHistory, isSending }: ChatAreaProps) {
                 <div className="bg-gray-100 rounded-lg p-3">
                   <div className="flex items-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin text-gray-600" />
-                    <p className="text-sm text-gray-600">AI is working...</p>
+                    <p className="text-sm text-gray-600">{t('chat.aiWorking')}</p>
                   </div>
                 </div>
               </div>

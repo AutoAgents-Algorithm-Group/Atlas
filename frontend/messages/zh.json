@@ -1,0 +1,68 @@
+{
+  "common": {
+    "loading": "加载中...",
+    "refresh": "刷新",
+    "start": "开始",
+    "send": "发送",
+    "ready": "就绪",
+    "waiting": "等待中",
+    "files": "个文件",
+    "found": "已找到"
+  },
+  "header": {
+    "title": "灵境",
+    "activeSession": "会话活跃",
+    "noActiveSession": "无活跃会话",
+    "sandboxFiles": "沙盒文件",
+    "filesDescription": "AI在沙盒中创建的文件",
+    "startSession": "启动会话",
+    "filesGeneratedHere": "AI生成的文件将显示在这里",
+    "noFilesGenerated": "暂未生成文件"
+  },
+  "chat": {
+    "welcome": "欢迎使用 灵境",
+    "aiWorking": "AI 正在工作中...",
+    "quickActions": "快捷操作：",
+    "startSessionFirst": "请先启动会话以开始聊天",
+    "planAndExecute": "计划、搜索并执行任何任务",
+    "agentPatience": "AI助手有时需要时间响应，请耐心等待。"
+  },
+  "artifacts": {
+    "computerTitle": "灵境 的电脑",
+    "startSession": "启动会话",
+    "atlasUsing": "灵境 正在使用",
+    "browser": "浏览器",
+    "browsing": "正在浏览",
+    "loading": "加载中...",
+    "noPageLoaded": "未加载页面",
+    "browserReady": "浏览器就绪",
+    "noSessionActive": "无活跃会话",
+    "browserReadyToUse": "浏览器已准备就绪",
+    "startSessionDesktop": "启动会话以查看桌面",
+    "taskProgress": "任务进度",
+    "command": "命令",
+    "file": "文件"
+  },
+  "quickMessages": [
+    "打开 Google 并搜索人工智能",
+    "访问 GitHub 并浏览热门项目",
+    "打开淘宝搜索手机",
+    "访问百度并搜索今天的新闻",
+    "打开 YouTube 并搜索编程教程"
+  ],
+  "messages": {
+    "sessionCreatedSuccess": "浏览器会话创建成功！",
+    "sessionResumedSuccess": "会话恢复成功",
+    "taskCompletedSuccess": "任务执行成功",
+    "enterMessage": "请输入消息",
+    "createSessionFirst": "请先创建会话",
+    "taskExecutionFailed": "任务执行失败",
+    "backendConnectFailed": "连接后端失败",
+    "downloadSuccess": "已下载 {filename}",
+    "downloadFailed": "文件下载失败"
+  },
+  "meta": {
+    "title": "灵境 - AI 浏览器控制器",
+    "description": "与 AI 聊天来控制 E2B 沙盒中的浏览器"
+  }
+}
