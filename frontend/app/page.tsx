@@ -1,25 +1,17 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Play, Loader2, Bot, Send, Download, FileText, Computer, Shield, ShieldCheck, Files } from 'lucide-react';
-import { Textarea } from '@/components/ui/textarea';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import {
-  ResizablePanelGroup,
-  ResizablePanel,
-  ResizableHandle,
-} from '@/components/ui/resizable';
+import { useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
+import ChatHeader from '@/components/ChatHeader';
+import ChatArea from '@/components/ChatArea';
+import ChatInput from '@/components/ChatInput';
+import Artifacts from '@/components/Artifacts';
 
 // 数据类型定义
 interface SessionStatus {
   success: boolean;
   active: boolean;
   initialized: boolean;
-  taken_over: boolean;
   stream_url?: string;
   message: string;
 }
@@ -49,8 +41,6 @@ export default function ChatPage() {
   const [streamUrl, setStreamUrl] = useState<string>('');
   const [isActive, setIsActive] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
-  const [isTakenOver, setIsTakenOver] = useState(false);
-  const [isTakingOver, setIsTakingOver] = useState(false);
   // const [statusMessage, setStatusMessage] = useState(''); // Removed as no longer needed
   
   // 聊天状态
@@ -63,17 +53,13 @@ export default function ChatPage() {
   const [isLoadingFiles, setIsLoadingFiles] = useState(false);
   const [isFilesDialogOpen, setIsFilesDialogOpen] = useState(false);
   
-  // 引用
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  // 滚动到底部
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [chatHistory]);
+  // 步骤/进度状态
+  const [currentStep, setCurrentStep] = useState(1);
+  const [totalSteps, setTotalSteps] = useState(1);
+  const [currentCommand, setCurrentCommand] = useState('');
+  const [currentFilePath, setCurrentFilePath] = useState('');
+  const [currentBrowserUrl, setCurrentBrowserUrl] = useState('');
+  
 
   // 检查会话状态
   const checkSessionStatus = async () => {
@@ -84,7 +70,6 @@ export default function ChatPage() {
       if (data.success) {
         setIsActive(data.active);
         setIsInitialized(data.initialized);
-        setIsTakenOver(data.taken_over || false);
         if (data.stream_url) {
           setStreamUrl(data.stream_url);
         }
@@ -156,56 +141,6 @@ export default function ChatPage() {
 
   // destroySession function removed as no longer needed
 
-  // 接管桌面
-  const takeOverDesktop = async () => {
-    setIsTakingOver(true);
-    
-    try {
-      const response = await fetch(`${API_BASE}/api/desktop/takeover`, {
-        method: 'POST',
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        setIsTakenOver(true);
-        toast.success('Desktop control taken over successfully!');
-      } else {
-        toast.error(data.message || 'Failed to take over desktop');
-      }
-    } catch (error) {
-      console.error('Error taking over desktop:', error);
-      toast.error('Failed to connect to backend');
-    } finally {
-      setIsTakingOver(false);
-    }
-  };
-
-  // 释放桌面
-  const releaseDesktop = async () => {
-    setIsTakingOver(true);
-    
-    try {
-      const response = await fetch(`${API_BASE}/api/desktop/release`, {
-        method: 'POST',
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        setIsTakenOver(false);
-        toast.success('Desktop control released successfully!');
-      } else {
-        toast.error(data.message || 'Failed to release desktop');
-      }
-    } catch (error) {
-      console.error('Error releasing desktop:', error);
-      toast.error('Failed to connect to backend');
-    } finally {
-      setIsTakingOver(false);
-    }
-  };
-
   // 发送消息
   const sendMessage = async () => {
     if (!currentMessage.trim()) {
@@ -215,11 +150,6 @@ export default function ChatPage() {
 
     if (!isActive || !isInitialized) {
       toast.error('Please create a session first');
-      return;
-    }
-
-    if (!isTakenOver) {
-      toast.error('Please take over desktop control first');
       return;
     }
 
@@ -264,6 +194,10 @@ export default function ChatPage() {
       
       if (data.success) {
         toast.success('Task completed successfully');
+        // Update step tracking
+        setCurrentCommand(message);
+        setTotalSteps(chatHistory.length + 1);
+        setCurrentStep(chatHistory.length + 1);
       } else {
         toast.error(data.error || 'Task execution failed');
       }
@@ -283,11 +217,61 @@ export default function ChatPage() {
     }
   };
 
-  // 处理键盘事件
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
+
+  // 步骤导航
+  const handlePreviousStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const handleNextStep = () => {
+    if (currentStep < totalSteps) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  // 从聊天历史中提取URL
+  const extractUrlFromChatHistory = () => {
+    if (chatHistory.length === 0) return;
+    
+    // 查看最近的几条成功消息，寻找URL
+    const recentMessages = chatHistory.slice(-3).reverse();
+    
+    for (const message of recentMessages) {
+      if (message.success && (message.message || message.response)) {
+        const text = `${message.message} ${message.response}`.toLowerCase();
+        
+        // 查找常见的URL模式
+        const urlPatterns = [
+          /https?:\/\/[^\s]+/gi,
+          /www\.[^\s]+/gi,
+          /(访问|打开|浏览|visit|open|browse)\s+([^\s]+\.[^\s]+)/gi,
+          /(搜索|search)\s+([^\s]+)/gi
+        ];
+        
+        for (const pattern of urlPatterns) {
+          const matches = text.match(pattern);
+          if (matches && matches[0]) {
+            let url = matches[0];
+            
+            // 如果是搜索指令，构造搜索URL
+            if (text.includes('搜索') || text.includes('search')) {
+              const searchTerm = url.replace(/(搜索|search)\s+/, '');
+              url = `https://www.google.com/search?q=${encodeURIComponent(searchTerm)}`;
+            }
+            // 如果没有协议，添加https
+            else if (!url.startsWith('http') && url.includes('.')) {
+              url = `https://${url}`;
+            }
+            
+            if (url && url !== currentBrowserUrl) {
+              setCurrentBrowserUrl(url);
+              return;
+            }
+          }
+        }
+      }
     }
   };
 
@@ -361,6 +345,15 @@ export default function ChatPage() {
     }
   }, [isActive, isInitialized, fetchSandboxFiles]);
 
+  // 监听聊天历史变化，提取URL信息
+  useEffect(() => {
+    if (isActive) {
+      extractUrlFromChatHistory();
+    } else {
+      setCurrentBrowserUrl('');
+    }
+  }, [chatHistory, isActive]);
+
   // 监听聊天历史，检测文件创建
   useEffect(() => {
     if (chatHistory.length > 0) {
@@ -370,298 +363,64 @@ export default function ChatPage() {
         setTimeout(() => {
           fetchSandboxFiles();
         }, 1000);
+        
+        // Try to extract file path from response
+        const pathMatch = lastMessage.response.match(/\/[^\s]+\.[a-z]+/i);
+        if (pathMatch) {
+          setCurrentFilePath(pathMatch[0]);
+        }
       }
     }
   }, [chatHistory, fetchSandboxFiles]);
 
   return (
-    <div className="h-screen bg-[#faf9f6]">
-      {/* 可调整大小的面板组 */}
-      <ResizablePanelGroup direction="horizontal" className="h-screen p-2 gap-2">
-        {/* 左侧聊天面板 */}
-        <ResizablePanel defaultSize={50} minSize={35}>
-          <Card className="h-full flex flex-col">
-            <CardHeader className="pb-0">
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    Browser Use Chat
-                  </CardTitle>
-                  <CardDescription>
-                    Control your browser with natural language
-                  </CardDescription>
-                </div>
-                
-                <div className="flex items-center gap-3">
-                  {/* Files 对话框按钮 */}
-                  <Dialog open={isFilesDialogOpen} onOpenChange={setIsFilesDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" size="sm">
-                        <Files className="h-4 w-4 mr-1" />
-                        Files
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-2xl max-h-[80vh]">
-                      <DialogHeader>
-                        <DialogTitle>Sandbox Files</DialogTitle>
-                        <DialogDescription>
-                          Files created by AI in the sandbox
-                        </DialogDescription>
-                      </DialogHeader>
-                      
-                      <div className="flex items-center justify-between mb-4">
-                        <p className="text-sm text-gray-600">
-                          {sandboxFiles.length} files found
-                        </p>
-                        <Button
-                          onClick={fetchSandboxFiles}
-                          disabled={isLoadingFiles || !isActive}
-                          variant="outline"
-                          size="sm"
-                        >
-                          {isLoadingFiles ? (
-                            <Loader2 className="h-3 w-3 animate-spin" />
-                          ) : (
-                            'Refresh'
-                          )}
-                        </Button>
-                      </div>
-                      
-                      <ScrollArea className="max-h-96">
-                        {!isActive ? (
-                          <div className="text-center text-gray-500 py-8">
-                            <FileText className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-                            <h3 className="text-lg font-medium mb-2">Start a session</h3>
-                            <p className="text-sm">
-                              Files generated by AI will appear here
-                            </p>
-                          </div>
-                        ) : sandboxFiles.length === 0 ? (
-                          <div className="text-center text-gray-500 py-8">
-                            <FileText className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-                            <h3 className="text-lg font-medium mb-2">No files generated yet</h3>
-                          </div>
-                        ) : (
-                          <div className="space-y-3">
-                            {sandboxFiles.map((file, index) => (
-                              <Card key={index} className="p-4">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex-1 min-w-0">
-                                    <h4 className="text-sm font-medium text-gray-900 truncate">
-                                      {file.name}
-                                    </h4>
-                                    <p className="text-xs text-gray-500">
-                                      {file.size > 0 ? `${Math.round(file.size / 1024)}KB` : 'Unknown size'}
-                                    </p>
-                                  </div>
-                                  <Button
-                                    onClick={() => downloadFile(file)}
-                                    variant="outline"
-                                    size="sm"
-                                    className="ml-3"
-                                  >
-                                    <Download className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              </Card>
-                            ))}
-                          </div>
-                        )}
-                      </ScrollArea>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-              </div>
-            </CardHeader>
-            
-            <CardContent className="flex-1 flex flex-col p-0">
-              {/* 聊天消息区域 */}
-              <ScrollArea className="flex-1 px-6">
-                {chatHistory.length === 0 ? (
-                  <div className="text-center text-gray-500 mt-20">
-                  </div>
-                ) : (
-                  <div className="space-y-6 py-6">
-                    {chatHistory.map((chat) => (
-                      <div key={chat.id} className="space-y-3">
-                        {/* 用户消息 */}
-                        <div className="flex justify-end">
-                          <div className="bg-blue-600 text-white rounded-lg p-3 max-w-[80%]">
-                            <p className="text-sm">{chat.message}</p>
-                            <p className="text-xs text-blue-100 mt-1">
-                              {chat.timestamp.toLocaleTimeString()}
-                            </p>
-                          </div>
-                        </div>
-                        
-                        {/* AI响应 */}
-                        {chat.response && (
-                          <div className="flex justify-start">
-                            <div className={`rounded-lg p-3 max-w-[80%] ${
-                              chat.success 
-                                ? 'bg-green-50 border border-green-200' 
-                                : 'bg-red-50 border border-red-200'
-                            }`}>
-                              <div className="flex items-start gap-2">
-                                <Bot className={`h-4 w-4 mt-0.5 ${
-                                  chat.success ? 'text-green-600' : 'text-red-600'
-                                }`} />
-                                <div>
-                                  <p className={`text-sm ${
-                                    chat.success ? 'text-green-800' : 'text-red-800'
-                                  }`}>
-                                    {chat.response}
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                    
-                    {/* 加载指示器 */}
-                    {isSending && (
-                      <div className="flex justify-start">
-                        <div className="bg-gray-100 rounded-lg p-3">
-                          <div className="flex items-center gap-2">
-                            <Loader2 className="h-4 w-4 animate-spin text-gray-600" />
-                            <p className="text-sm text-gray-600">AI is working...</p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-                <div ref={messagesEndRef} />
-              </ScrollArea>
-
-              {/* 输入区域 */}
-              <div className="border-t p-4">
-                {/* 快捷消息按钮 */}
-                {isActive && isInitialized && isTakenOver && (
-                  <div className="mb-3">
-                    <p className="text-xs text-gray-500 mb-2">Quick actions:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {quickMessages.map((msg, index) => (
-                        <Button
-                          key={index}
-                          variant="outline"
-                          size="sm"
-                          className="text-xs h-8"
-                          onClick={() => setCurrentMessage(msg)}
-                          disabled={isSending}
-                        >
-                          {msg.length > 30 ? msg.substring(0, 30) + '...' : msg}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                
-                {/* 消息输入框 */}
-                <div className="flex gap-3">
-                  <Textarea
-                    placeholder={
-                      !isActive || !isInitialized 
-                        ? "Start a session first to begin chatting"
-                        : !isTakenOver
-                        ? "Take over desktop control to send commands"
-                        : "Type your message here... (e.g., 'Open Google and search for AI')"
-                    }
-                    value={currentMessage}
-                    onChange={(e) => setCurrentMessage(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    className="flex-1 min-h-[60px] resize-none"
-                    disabled={isSending || !isActive || !isInitialized || !isTakenOver}
-                  />
-                  <Button
-                    onClick={sendMessage}
-                    disabled={isSending || !isActive || !isInitialized || !isTakenOver || !currentMessage.trim()}
-                    size="lg"
-                    className="px-6"
-                  >
-                    {isSending ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Send className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-                
-                <p className="text-xs text-gray-500 mt-2">
-                  Press Enter to send, Shift+Enter for new line
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </ResizablePanel>
-
-        <ResizableHandle withHandle />
-
-        {/* 右侧预览面板 */}
-        <ResizablePanel defaultSize={50} minSize={43}>
-          <Card className="h-full flex flex-col gap-0">
-            <CardHeader className="pb-0">
-              <div className="flex items-center justify-between">
-                <CardTitle>AgentsPro Computer</CardTitle>
-                
-                {/* 会话控制按钮 */}
-                <div className="flex gap-2">
-                  <Button
-                    onClick={isActive ? resumeSession : createSession}
-                    disabled={isCreatingSession}
-                    size="sm"
-                  >
-                    {isCreatingSession ? (
-                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                    ) : (
-                      <Play className="h-4 w-4 mr-1" />
-                    )}
-                    Start Session
-                  </Button>
-                  
-                  {isActive && isInitialized && (
-                    <Button
-                      onClick={isTakenOver ? releaseDesktop : takeOverDesktop}
-                      disabled={isTakingOver}
-                      variant={isTakenOver ? "outline" : "default"}
-                      size="sm"
-                    >
-                      {isTakingOver ? (
-                        <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                      ) : isTakenOver ? (
-                        <Shield className="h-4 w-4 mr-1" />
-                      ) : (
-                        <ShieldCheck className="h-4 w-4 mr-1" />
-                      )}
-                      {isTakenOver ? 'Release' : 'Take Over'}
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </CardHeader>
-            
-            <CardContent className="flex-1 p-6">
-              <div className="h-full flex flex-col">
-                <div className="flex-1 rounded-lg border overflow-hidden">
-                  {streamUrl ? (
-                    <iframe
-                      src={streamUrl}
-                      className="w-full h-full border-0"
-                      allow="camera; microphone; clipboard-read; clipboard-write"
-                      title="E2B Desktop VNC"
-                    />
-                  ) : (
-                    <div className="h-full flex items-center justify-center bg-[#f8f8f7]">
-                    </div>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </ResizablePanel>
-      </ResizablePanelGroup>
+    <div className="h-screen bg-[#faf9f6] flex">
+      {/* 左侧区域 */}
+      <div className="flex-1 flex flex-col">
+        <ChatHeader
+          isActive={isActive}
+          sandboxFiles={sandboxFiles}
+          isFilesDialogOpen={isFilesDialogOpen}
+          setIsFilesDialogOpen={setIsFilesDialogOpen}
+          isLoadingFiles={isLoadingFiles}
+          fetchSandboxFiles={fetchSandboxFiles}
+          downloadFile={downloadFile}
+        />
+        
+        <ChatArea
+          chatHistory={chatHistory}
+          isSending={isSending}
+        />
+        
+        <ChatInput
+          currentMessage={currentMessage}
+          setCurrentMessage={setCurrentMessage}
+          sendMessage={sendMessage}
+          isSending={isSending}
+          isActive={isActive}
+          isInitialized={isInitialized}
+          quickMessages={quickMessages}
+        />
+      </div>
+      
+      {/* 右侧预览面板容器 */}
+      <div className="w-[48rem] py-4 pr-4">
+        <Artifacts
+          streamUrl={streamUrl}
+          isActive={isActive}
+          isInitialized={isInitialized}
+          isCreatingSession={isCreatingSession}
+          currentStep={currentStep}
+          totalSteps={totalSteps}
+          currentCommand={currentCommand}
+          currentFilePath={currentFilePath}
+          currentBrowserUrl={currentBrowserUrl}
+          createSession={createSession}
+          resumeSession={resumeSession}
+          handlePreviousStep={handlePreviousStep}
+          handleNextStep={handleNextStep}
+        />
+      </div>
     </div>
   );
 }
