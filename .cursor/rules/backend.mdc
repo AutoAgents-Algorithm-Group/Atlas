@@ -76,9 +76,9 @@ except Exception as e:
 - Don't create multiple agent instances
 
 ### 4. CORS Configuration
-Frontend runs on port 3100, backend on 8100. CORS is configured in [backend/API/main.py](mdc:backend/API/main.py) for:
-- `http://localhost:3100`
-- `http://127.0.0.1:3100` 
+Frontend runs on port 3000, backend on 8000. CORS is configured in [backend/API/main.py](mdc:backend/API/main.py) for:
+- `http://localhost:3000`
+- `http://127.0.0.1:3000` 
 - Production domains
 
 ## 🔧 Dependencies

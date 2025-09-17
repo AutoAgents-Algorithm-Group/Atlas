@@ -4,7 +4,7 @@ globs: docker/**/*,Dockerfile,docker-compose.yml,setup.sh,Makefile
 
 # Docker & Deployment Configuration
 
-Atlas includes containerized deployment support and automation scripts for easy setup and deployment.
+Hera includes containerized deployment support and automation scripts for easy setup and deployment.
 
 ## 🐳 Docker Configuration
 
@@ -15,21 +15,21 @@ Atlas includes containerized deployment support and automation scripts for easy 
 
 ### Container Architecture
 ```yaml
-# Typical docker-compose.yml structure for Atlas
+# Typical docker-compose.yml structure for Hera
 services:
   frontend:
     build: ./frontend
     ports:
-      - "3100:3100"
+      - "3000:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://backend:8100
+      - NEXT_PUBLIC_API_URL=http://backend:8000
   
   backend:
     build: ./backend
     ports:
-      - "8100:8100"
+      - "8000:8000"
     environment:
-      - E2B_API_KEY=${E2B_API_KEY}
+      - NODE_ENV=production
 ```
 
 ## 🛠️ Setup & Deployment Scripts
@@ -39,7 +39,7 @@ services:
 - Interactive project configuration
 - Environment variable setup
 - Dependency installation
-- Port configuration (default: frontend 3100, backend 8100)
+- Port configuration (default: frontend 3000, backend 8000)
 - Creates necessary config files
 
 ### Application Startup
@@ -103,24 +103,23 @@ docker build -f docker/Dockerfile -t atlas-app .
 ### Environment Variables
 ```bash
 # Backend Configuration
-E2B_API_KEY=your_e2b_api_key
-OPENAI_API_KEY=your_openai_key
-PORT=8100
+NODE_ENV=development
+PORT=8000
 
 # Frontend Configuration
-NEXT_PUBLIC_API_URL=http://localhost:8100
-PORT=3100
+NEXT_PUBLIC_API_URL=http://localhost:8000
+PORT=3000
 ```
 
 ### Port Configuration
-- **Frontend**: Default port 3100 (configurable in package.json)
-- **Backend**: Default port 8100 (configurable in main.py)
+- **Frontend**: Default port 3000 (configurable in package.json)
+- **Backend**: Default port 8000 (configurable in main.py)
 - **Docker**: Ports mapped 1:1 with host system
 
 ### Service Dependencies
-1. **E2B Cloud Desktop**: Requires valid E2B API key
-2. **OpenAI API**: For Browser Use AI functionality
-3. **Network Access**: For E2B desktop streaming and API calls
+1. **Node.js**: Frontend development and runtime
+2. **Python**: Backend API development
+3. **Docker**: Container orchestration and deployment
 
 ## 📦 Build Optimization
 
@@ -136,7 +135,7 @@ FROM node:18-alpine AS runner
 COPY --from=builder /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
-EXPOSE 3100
+EXPOSE 3000
 CMD ["npm", "start"]
 ```
 
@@ -148,8 +147,8 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 COPY . .
-EXPOSE 8100
-CMD ["uvicorn", "API.main:app", "--host", "0.0.0.0", "--port", "8100"]
+EXPOSE 8000
+CMD ["uvicorn", "API.main:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
 
 ## 🔍 Health Checks & Monitoring
@@ -157,12 +156,12 @@ CMD ["uvicorn", "API.main:app", "--host", "0.0.0.0", "--port", "8100"]
 ### Health Check Endpoints
 - **Backend**: `/api/health` - FastAPI health status
 - **Frontend**: Next.js built-in health checks
-- **E2B**: Check desktop session status via `/api/status`
+- **Application**: Monitor service availability and performance
 
 ### Docker Health Checks
 ```dockerfile
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:8100/api/health || exit 1
+  CMD curl -f http://localhost:8000/api/health || exit 1
 ```
 
 ## 🚀 Deployment Best Practices
@@ -174,7 +173,7 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 
 ### 2. Resource Management
 - Configure appropriate CPU/memory limits
-- Monitor E2B usage and costs
+- Monitor application performance and usage
 - Implement proper logging and monitoring
 
 ### 3. Network Security

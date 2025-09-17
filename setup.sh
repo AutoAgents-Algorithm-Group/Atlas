@@ -1,17 +1,11 @@
 #!/bin/bash
 
-# E2B Computer Use Setup Script
-# 用于修改项目名称、端口配置和其他设置
+# Modern Full-Stack Project Setup Script
+# 现代全栈项目设置脚本
 
 set -e  # 遇到错误时退出
 
-echo "🚀 E2B Computer Use Project Setup"
-echo "=================================="
-echo "📋 This setup will guide you through 4 main steps:"
-echo "   1. Project name configuration"
-echo "   2. Port configuration" 
-echo "   3. Dependencies installation"
-echo "   4. Summary"
+echo "🚀 Project Setup Wizard"
 echo ""
 
 # 颜色定义
@@ -37,16 +31,9 @@ fi
 # ========================================
 # STEP 1: 项目名称配置
 # ========================================
-echo -e "${BLUE}[STEP 1/4] 📦 Project Name Configuration${NC}"
-echo "========================================"
-echo ""
-
-# 显示当前项目名称
 CURRENT_NAME=$(grep '"name":' frontend/package.json | sed 's/.*"name": *"\([^"]*\)".*/\1/')
+echo -e "${BLUE}[STEP 1/4] Do you want to change the project name?${NC}"
 echo -e "${BLUE}📦 Current project name: ${YELLOW}$CURRENT_NAME${NC}"
-echo ""
-
-# 提示用户输入新的项目名称
 echo -e "${BLUE}💡 Enter new project name (or press Enter to keep current name):${NC}"
 read -p "New name: " NEW_NAME
 
@@ -61,7 +48,7 @@ else
         echo "Project name should:"
         echo "  - Start with lowercase letter or number"
         echo "  - Only contain lowercase letters, numbers, dots, hyphens, and underscores"
-        echo "  - Example: my-awesome-project, frontend-app, e2b-desktop"
+        echo "  - Example: my-awesome-project, frontend-app, modern-template"
         exit 1
     fi
     
@@ -91,28 +78,22 @@ echo ""
 # ========================================
 # STEP 2: 端口配置
 # ========================================
-echo -e "${BLUE}[STEP 2/4] 🔧 Port Configuration${NC}"
-echo "=================================="
-echo ""
-
 # 读取当前端口配置
-CURRENT_BACKEND_PORT=$(grep 'port=' backend/API/main.py | sed 's/.*port=\([0-9]*\).*/\1/')
+CURRENT_BACKEND_PORT=$(grep 'port=' backend/API/main.py | sed 's/.*port=\([0-9]*\).*/\1/' | head -1)
 if [ -z "$CURRENT_BACKEND_PORT" ]; then
     CURRENT_BACKEND_PORT="8000"  # 默认后端端口
 fi
 
-# 从package.json读取前端端口，如果没有配置则默认3000
-CURRENT_FRONTEND_PORT=$(grep '"dev":' frontend/package.json | grep -o '\-p [0-9]*' | sed 's/-p //')
+# 从package.json或Makefile读取前端端口
+CURRENT_FRONTEND_PORT=$(grep 'localhost:' Makefile | grep -o '[0-9]*' | head -1)
 if [ -z "$CURRENT_FRONTEND_PORT" ]; then
     CURRENT_FRONTEND_PORT="3000"  # Next.js默认端口
 fi
 
+echo -e "${BLUE}[STEP 2/4] Do you want to configure ports?${NC}"
 echo -e "${BLUE}📡 Current backend port: ${YELLOW}$CURRENT_BACKEND_PORT${NC}"
 echo -e "${BLUE}📱 Current frontend port: ${YELLOW}$CURRENT_FRONTEND_PORT${NC}"
-echo ""
-
-# 询问是否要配置端口
-echo -e "${BLUE}🔧 Do you want to configure ports? (y/N)${NC}"
+echo -e "${BLUE}🔧 Configure ports? (y/N)${NC}"
 read -p "Configure ports: " CONFIGURE_PORTS
 
 if [[ "$CONFIGURE_PORTS" =~ ^[Yy]$ ]]; then
@@ -190,49 +171,24 @@ if [[ "$CONFIGURE_PORTS" =~ ^[Yy]$ ]]; then
         if [[ "$OSTYPE" == "darwin"* ]]; then
             # 更新backend端口
             sed -i '' "s/--port [0-9]*/--port $NEW_BACKEND_PORT/g" Makefile
-            sed -i '' "s/localhost:8000/localhost:$NEW_BACKEND_PORT/g" Makefile
+            # 更新前端端口引用
             sed -i '' "s/localhost:3000/localhost:$NEW_FRONTEND_PORT/g" Makefile
+            sed -i '' "s/localhost:$CURRENT_FRONTEND_PORT/localhost:$NEW_FRONTEND_PORT/g" Makefile
+            # 更新后端端口引用
+            sed -i '' "s/localhost:8000/localhost:$NEW_BACKEND_PORT/g" Makefile
+            sed -i '' "s/localhost:$CURRENT_BACKEND_PORT/localhost:$NEW_BACKEND_PORT/g" Makefile
         else
             sed -i "s/--port [0-9]*/--port $NEW_BACKEND_PORT/g" Makefile
-            sed -i "s/localhost:8000/localhost:$NEW_BACKEND_PORT/g" Makefile
+            # 更新前端端口引用
             sed -i "s/localhost:3000/localhost:$NEW_FRONTEND_PORT/g" Makefile
+            sed -i "s/localhost:$CURRENT_FRONTEND_PORT/localhost:$NEW_FRONTEND_PORT/g" Makefile
+            # 更新后端端口引用
+            sed -i "s/localhost:8000/localhost:$NEW_BACKEND_PORT/g" Makefile
+            sed -i "s/localhost:$CURRENT_BACKEND_PORT/localhost:$NEW_BACKEND_PORT/g" Makefile
         fi
         
         echo -e "${GREEN}✅ Makefile updated with new ports${NC}"
     fi
-    
-    # 为frontend创建环境配置
-    echo -e "${YELLOW}🔧 Creating frontend environment configuration...${NC}"
-    
-    # 从.env.example复制到.env.local并更新值
-    if [ -f "frontend/.env.example" ]; then
-        cp frontend/.env.example frontend/.env.local
-        echo -e "${BLUE}   - Copied from .env.example${NC}"
-    else
-        # 如果没有.env.example，创建一个基本的.env.local
-        cat > frontend/.env.local << EOF
-NEXT_PUBLIC_API_URL=http://localhost:8000
-EOF
-    fi
-    
-    # 更新API URL配置
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        sed -i '' "s|NEXT_PUBLIC_API_URL=.*|NEXT_PUBLIC_API_URL=http://localhost:$NEW_BACKEND_PORT|" frontend/.env.local
-    else
-        sed -i "s|NEXT_PUBLIC_API_URL=.*|NEXT_PUBLIC_API_URL=http://localhost:$NEW_BACKEND_PORT|" frontend/.env.local
-    fi
-    
-    echo -e "${GREEN}✅ Frontend environment configuration created: frontend/.env.local${NC}"
-    echo -e "${BLUE}   - Frontend port: $NEW_FRONTEND_PORT${NC}"
-    echo -e "${BLUE}   - API URL: http://localhost:$NEW_BACKEND_PORT${NC}"
-    
-    # 更新package.json中的dev脚本端口
-    echo -e "${YELLOW}🔧 Updating package.json dev script port...${NC}"
-    
-    # 使用sed替换dev脚本中的端口号
-    sed -i.tmp "s/\"dev\": \"next dev --turbopack -p [0-9]*\"/\"dev\": \"next dev --turbopack -p $NEW_FRONTEND_PORT\"/g" frontend/package.json
-    rm -f frontend/package.json.tmp
-    echo -e "${GREEN}✅ Package.json dev script updated with port: $NEW_FRONTEND_PORT${NC}"
     
     echo ""
     echo -e "${GREEN}🎯 Port Configuration Summary:${NC}"
@@ -245,39 +201,6 @@ else
     NEW_BACKEND_PORT="$CURRENT_BACKEND_PORT"
     NEW_FRONTEND_PORT="$CURRENT_FRONTEND_PORT"
     echo -e "${YELLOW}⏭️  Keeping current port configuration${NC}"
-    
-    # 即使不修改端口，也要确保.env.local文件存在
-    echo -e "${YELLOW}🔧 Ensuring frontend environment configuration exists...${NC}"
-    
-    # 如果.env.local不存在，从.env.example复制
-    if [ ! -f "frontend/.env.local" ]; then
-        if [ -f "frontend/.env.example" ]; then
-            cp frontend/.env.example frontend/.env.local
-            echo -e "${BLUE}   - Copied from .env.example${NC}"
-        else
-            # 如果没有.env.example，创建一个基本的.env.local
-            cat > frontend/.env.local << EOF
-NEXT_PUBLIC_API_URL=http://localhost:8000
-EOF
-        fi
-    fi
-    
-    # 确保API URL配置正确
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        sed -i '' "s|NEXT_PUBLIC_API_URL=.*|NEXT_PUBLIC_API_URL=http://localhost:$NEW_BACKEND_PORT|" frontend/.env.local
-    else
-        sed -i "s|NEXT_PUBLIC_API_URL=.*|NEXT_PUBLIC_API_URL=http://localhost:$NEW_BACKEND_PORT|" frontend/.env.local
-    fi
-    
-    echo -e "${GREEN}✅ Frontend environment configuration ensured: frontend/.env.local${NC}"
-    
-    # 确保package.json中的dev脚本端口与当前配置一致
-    echo -e "${YELLOW}🔧 Ensuring package.json dev script port consistency...${NC}"
-    
-    # 使用sed替换dev脚本中的端口号
-    sed -i.tmp "s/\"dev\": \"next dev --turbopack -p [0-9]*\"/\"dev\": \"next dev --turbopack -p $NEW_FRONTEND_PORT\"/g" frontend/package.json
-    rm -f frontend/package.json.tmp
-    echo -e "${GREEN}✅ Package.json dev script port ensured: $NEW_FRONTEND_PORT${NC}"
 fi
 
 echo ""
@@ -285,33 +208,21 @@ echo ""
 # ========================================
 # STEP 3: 依赖安装
 # ========================================
-echo -e "${BLUE}[STEP 3/4] 📦 Dependencies Installation${NC}"
-echo "======================================"
-echo ""
+echo -e "${BLUE}[STEP 3/4] Do you want to install dependencies?${NC}"
+echo -e "${BLUE}📦 Install frontend and backend dependencies using 'make install'? (Y/n)${NC}"
+read -p "Install dependencies: " INSTALL_DEPS
 
-# 询问是否要安装依赖
-echo -e "${BLUE}📦 Do you want to install frontend dependencies? (y/N)${NC}"
-read -p "Install deps: " INSTALL_DEPS
-
-if [[ "$INSTALL_DEPS" =~ ^[Yy]$ ]]; then
-    echo -e "${YELLOW}🔄 Installing frontend dependencies...${NC}"
-    cd frontend
+if [[ ! "$INSTALL_DEPS" =~ ^[Nn]$ ]]; then
+    echo -e "${YELLOW}🔄 Installing dependencies using make install...${NC}"
     
-    # 删除旧的node_modules和package-lock.json（如果存在）
-    if [ -d "node_modules" ]; then
-        rm -rf node_modules
-        echo -e "${GREEN}✅ Removed old node_modules${NC}"
+    # 运行make install
+    if make install; then
+        echo -e "${GREEN}✅ Dependencies installed successfully${NC}"
+    else
+        echo -e "${RED}❌ Error: Failed to install dependencies${NC}"
+        echo "Please check the error messages above and try again."
+        exit 1
     fi
-    
-    if [ -f "package-lock.json" ]; then
-        rm package-lock.json
-        echo -e "${GREEN}✅ Removed old package-lock.json${NC}"
-    fi
-    
-    # 安装依赖
-    npm install
-    echo -e "${GREEN}✅ Dependencies installed successfully${NC}"
-    cd ..
 else
     echo -e "${YELLOW}⏭️  Skipping dependencies installation${NC}"
 fi
@@ -319,34 +230,78 @@ fi
 echo ""
 
 # ========================================
-# STEP 4: 总结
+# STEP 4: 环境配置
 # ========================================
-echo -e "${BLUE}[STEP 4/4] 📋 Summary${NC}"
-echo "========================"
+echo -e "${BLUE}[STEP 4/4] Do you want to create environment configuration?${NC}"
+if [ -f "frontend/.env.example" ]; then
+    echo -e "${BLUE}📄 Found frontend/.env.example${NC}"
+else
+    echo -e "${BLUE}📄 No frontend/.env.example found (will create default)${NC}"
+fi
+if [ -f "backend/.env.example" ]; then
+    echo -e "${BLUE}📄 Found backend/.env.example${NC}"
+fi
+echo -e "${BLUE}🔧 Create environment configuration files? (Y/n)${NC}"
+read -p "Create env files: " CREATE_ENV
+
+if [[ ! "$CREATE_ENV" =~ ^[Nn]$ ]]; then
+    echo -e "${YELLOW}🔧 Creating environment configuration files...${NC}"
+
+    # 为frontend创建环境配置
+if [ -f "frontend/.env.example" ]; then
+    # 如果存在.env.example，复制到.env
+    cp frontend/.env.example frontend/.env
+    echo -e "${BLUE}   - Copied from .env.example to .env${NC}"
+else
+    # 如果没有.env.example，创建基本的环境文件
+    cat > frontend/.env << EOF
+NEXT_PUBLIC_API_URL=http://localhost:$NEW_BACKEND_PORT
+EOF
+    echo -e "${BLUE}   - Created .env with default configuration${NC}"
+fi
+
+# 更新API URL配置
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    sed -i '' "s|NEXT_PUBLIC_API_URL=.*|NEXT_PUBLIC_API_URL=http://localhost:$NEW_BACKEND_PORT|" frontend/.env
+else
+    sed -i "s|NEXT_PUBLIC_API_URL=.*|NEXT_PUBLIC_API_URL=http://localhost:$NEW_BACKEND_PORT|" frontend/.env
+fi
+
+    # 为backend创建环境配置（如果需要）
+    if [ -f "backend/.env.example" ]; then
+        cp backend/.env.example backend/.env
+        echo -e "${BLUE}   - Copied backend/.env.example to backend/.env${NC}"
+    fi
+    
+    echo -e "${GREEN}✅ Environment configuration completed${NC}"
+else
+    echo -e "${YELLOW}⏭️  Skipping environment configuration${NC}"
+fi
+
 echo ""
+
+# ========================================
+# 总结
+# ========================================
 echo -e "${GREEN}🎉 Setup completed successfully!${NC}"
 echo ""
 echo -e "${BLUE}📋 Configuration Summary:${NC}"
 echo -e "  Project name: ${YELLOW}$NEW_NAME${NC}"
 echo -e "  Backend port: ${YELLOW}$NEW_BACKEND_PORT${NC}"
 echo -e "  Frontend port: ${YELLOW}$NEW_FRONTEND_PORT${NC}"
-echo -e "  Frontend path: ${YELLOW}frontend/${NC}"
-echo -e "  Package.json: ${YELLOW}frontend/package.json${NC}"
 echo ""
-echo -e "${BLUE}🌐 Service URLs:${NC}"
-echo -e "  Frontend: ${YELLOW}http://localhost:$NEW_FRONTEND_PORT${NC}"
-echo -e "  Backend API: ${YELLOW}http://localhost:$NEW_BACKEND_PORT${NC}"
-echo -e "  API Documentation: ${YELLOW}http://localhost:$NEW_BACKEND_PORT/docs${NC}"
-echo ""
-echo -e "${BLUE}🚀 Next steps:${NC}"
-echo "  1. Start development: make dev"
-echo "  2. Or manually:"
-echo "     Backend: cd backend && uvicorn API.main:app --host 0.0.0.0 --port $NEW_BACKEND_PORT --reload"
-echo "     Frontend: cd frontend && npm run dev"
-echo ""
-echo -e "${BLUE}📁 Configuration files modified:${NC}"
-echo -e "  ✅ frontend/package.json (dev script port)"
+echo -e "${BLUE}📁 Configuration files created/updated:${NC}"
+echo -e "  ✅ frontend/package.json (project name)"
 echo -e "  ✅ backend/API/main.py (ports and CORS)"
 echo -e "  ✅ Makefile (ports)"
-echo -e "  ✅ frontend/.env.local (environment variables)"
+if [[ ! "$CREATE_ENV" =~ ^[Nn]$ ]]; then
+    echo -e "  ✅ frontend/.env (environment variables)"
+    if [ -f "backend/.env" ]; then
+        echo -e "  ✅ backend/.env (environment variables)"
+    fi
+fi
+echo ""
+echo -e "${BLUE}🚀 Next steps:${NC}"
+echo "  Terminal Run: make dev"
+
 echo ""

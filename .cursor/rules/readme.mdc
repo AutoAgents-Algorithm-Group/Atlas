@@ -4,17 +4,17 @@ globs: README.md,README-CN.md
 
 # README Documentation Guidelines
 
-This rule provides guidance for creating and maintaining comprehensive README documentation for the Atlas project.
+This rule provides guidance for creating and maintaining comprehensive README documentation for the Hera project.
 
 ## 📑 README Structure Template
 
-### Atlas Modern README Layout
+### Hera Modern README Layout
 ```markdown
 <div align="center">
 
-<img src="https://img.shields.io/badge/-Atlas-000000?style=for-the-badge&labelColor=faf9f6&color=faf9f6&logoColor=000000" alt="Atlas" width="280"/>
+<img src="https://img.shields.io/badge/-Hera-000000?style=for-the-badge&labelColor=faf9f6&color=faf9f6&logoColor=000000" alt="Hera" width="280"/>
 
-<h4>AI-Powered Browser Automation Platform</h4>
+<h4>Modern Full-Stack Development Template</h4>
 
 **English** | [简体中文](README-CN.md)
 
@@ -25,19 +25,18 @@ This rule provides guidance for creating and maintaining comprehensive README do
 
 </div>
 
-Brief project description and main value proposition
+Named after Hera, the Queen of Olympian Gods in Greek mythology, this template serves as the foundation for creating exceptional modern applications with production-ready architecture.
 
 ## Table of Contents
-- [Why Atlas?](#why-atlas)
+- [Table of Contents](#table-of-contents)
+- [Why Hera?](#why-hera)
 - [Quick Start](#quick-start)
-- [Architecture](#architecture)
 - [Deployment](#deployment)
 - [Contributing](#contributing)
 - [License](#license)
 
-## Why Atlas?
+## Why Hera?
 ## Quick Start
-## Architecture
 ## Deployment
 ## Contributing
 ## License
@@ -46,26 +45,25 @@ Brief project description and main value proposition
 ## 🗂️ Catalog (Table of Contents)
 
 ### Essential Sections
-- **Why Atlas**: Highlight key capabilities, benefits, and value proposition
+- **Why Hera**: Highlight key capabilities, benefits, and value proposition
 - **Quick Start**: Get users running in < 5 minutes
 - **Deployment**: Production deployment guides
 - **Contributing**: Guidelines for contributors
 - **License**: Project licensing information
 
-### Atlas-Specific Sections
+### Hera-Specific Sections
 ```markdown
 ## Table of Contents
-- [Why Atlas?](#why-atlas)
+- [Table of Contents](#table-of-contents)
+- [Why Hera?](#why-hera)
 - [Quick Start](#quick-start)
-- [Architecture](#architecture)
 - [Deployment](#deployment)
-- [Development](#development)
 - [Contributing](#contributing)
 - [License](#license)
 ```
 
 ### Setup Script Emphasis
-**CRITICAL**: Always prominently feature the `setup.sh` script in Atlas documentation:
+**CRITICAL**: Always prominently feature the `setup.sh` script in Hera documentation:
 - Position it as the **primary installation method**
 - Explain its 4-step configuration process
 - Provide manual alternatives as secondary options
@@ -75,7 +73,7 @@ Brief project description and main value proposition
 ```markdown
 ## Interactive Setup with setup.sh
 
-Atlas includes a powerful interactive setup script that automates the entire configuration process:
+Hera includes a powerful interactive setup script that automates the entire configuration process:
 
 \`\`\`bash
 # Run the setup script
@@ -91,8 +89,8 @@ The setup script guides you through **4 essential steps**:
 - Set up directory structure
 
 ### Step 2: Port Configuration  
-- **Frontend Port**: Default 3100 (customizable)
-- **Backend Port**: Default 8100 (customizable)
+- **Frontend Port**: Default 3000 (customizable)
+- **Backend Port**: Default 8000 (customizable)
 - Automatic port conflict detection
 - Updates all configuration files
 
@@ -101,9 +99,9 @@ The setup script guides you through **4 essential steps**:
 - **Backend**: Automatic `pip install -r requirements.txt`
 - Dependency verification and troubleshooting
 
-### Step 4: Summary & Next Steps
-- Configuration summary display
+### Step 4: Environment Configuration
 - Environment file creation
+- Configuration summary display
 - Ready-to-run status confirmation
 
 ### Benefits of Using setup.sh
@@ -114,130 +112,92 @@ The setup script guides you through **4 essential steps**:
 - ✅ **Consistent Environment**: Ensures proper configuration across systems
 ```
 
-## Why Atlas Section
+## Why Hera Section
 
-### Why Atlas Documentation Pattern
+### Why Hera Documentation Pattern
 ```markdown
-## Why Atlas?
+## Why Hera?
 
-Atlas 是一个革命性的 AI 浏览器控制器，让你可以通过自然语言对话来操控浏览器。基于 E2B 云桌面技术，Atlas 提供了安全、隔离的浏览器自动化环境，支持复杂的 Web 操作任务。
+Hera is a revolutionary full-stack development template that empowers developers to create modern applications with unprecedented speed and reliability. Like its namesake, the powerful Queen of Olympian Gods, Hera provides the foundation and nurturing environment for your projects to flourish.
 
-### 核心特性
+### Core Features
 
-#### AI-Powered Browser Automation
-- **自然语言控制**：通过聊天对话控制浏览器操作，零编程门槛
-- **E2B 云桌面**：安全隔离的云环境进行浏览器自动化
-- **实时预览**：通过桌面流观看 AI 操作过程
+#### Modern Full-Stack Architecture
+- **Time to Market**: Reduce development time by up to 70% with pre-configured setup
+- **Best Practices**: Follow industry standards and proven architectural patterns
+- **Flexibility**: Easily customizable to fit your specific requirements
 
-#### Modern Chat Interface
-- **直观界面**：类 ChatGPT 的对话体验
-- **多语言支持**：支持中英文界面切换
-- **实时状态**：显示会话状态和连接状态
+#### Developer Experience
+- **Community**: Built on popular, well-supported technologies
+- **Documentation**: Comprehensive guides and examples
+- **Interactive Setup**: Guided configuration through setup.sh script
 
-#### Desktop Management
-- **会话控制**：创建、暂停、恢复和销毁会话
-- **Take Over 模式**：在 AI 控制和手动控制之间切换
-- **文件管理**：下载和管理 AI 生成的文件
+#### Production Ready
+- **Docker Support**: Containerized deployment ready
+- **Modern Stack**: Next.js frontend with FastAPI backend
+- **Development Tools**: Integrated development environment
 
-#### Developer Features
-- **模块化 API**：清晰的 FastAPI 路由架构
-- **Docker 支持**：容器化部署就绪
-- **开源项目**：MIT 许可证，完整源码访问
+### Why Choose Hera?
 
-### 为什么选择 Atlas？
-
-- **零编程门槛**：无需编写代码，通过对话即可完成复杂操作
-- **安全可靠**：E2B 云桌面确保操作安全性和环境隔离
-- **快速部署**：一键 Docker 部署，支持生产环境
-- **灵活控制**：AI 自动化与手动控制无缝切换
+- **Zero Configuration**: Get started immediately with interactive setup
+- **Best Practices**: Industry-standard architecture and patterns
+- **Fast Development**: Pre-configured tools and workflows
+- **Production Ready**: Docker deployment and modern stack
 ```
 
-### Why Atlas Writing Guidelines
-- **Value proposition first**: Start with what Atlas enables users to achieve
-- **Problem-solution approach**: Highlight pain points and how Atlas solves them
+### Why Hera Writing Guidelines
+- **Value proposition first**: Start with what Hera enables users to achieve
+- **Problem-solution approach**: Highlight pain points and how Hera solves them
 - **Use action-oriented headlines**: Focus on what users can DO
 - **Include concrete benefits**: Why each feature matters in practice
 - **Be specific**: Avoid vague marketing language, provide tangible outcomes
 - **Group logically**: Related features and benefits together
 - **Clean design**: Professional appearance without emojis
-- **Show differentiation**: What makes Atlas unique compared to alternatives
+- **Show differentiation**: What makes Hera unique compared to alternatives
 
 ## Quick Start Section
 
-### Atlas Quick Start Template
+### Hera Quick Start Template
 ```markdown
 ## Quick Start
 
 ### Prerequisites
 - Node.js 18+ and npm
 - Python 3.11+
-- E2B API key ([Get one here](https://e2b.dev))
-- OpenAI API key
+- Docker (optional, for containerized deployment)
 
 ### Automated Setup with setup.sh (Recommended)
 
-The easiest way to get Atlas running is using our interactive setup script:
+The easiest way to get Hera running is using our interactive setup script:
 
 \`\`\`bash
 # 1. Clone the repository
-git clone https://github.com/your-org/atlas.git
-cd atlas
+git clone https://github.com/AutoAgents-Algorithm-Group/Hera.git
+cd Hera
 
 # 2. Make setup script executable and run it
 chmod +x setup.sh
 ./setup.sh
+
+# 3. Start development
+make dev
 \`\`\`
 
 The setup script will guide you through:
 - ✅ **Project Configuration**: Customize project name and settings
-- ✅ **Port Configuration**: Set frontend (default: 3100) and backend (default: 8100) ports
+- ✅ **Port Configuration**: Set frontend (default: 3000) and backend (default: 8000) ports
 - ✅ **Dependencies Installation**: Automatically install frontend and backend dependencies
 - ✅ **Environment Setup**: Create necessary configuration files
 
-### Start Development
-\`\`\`bash
-# After setup.sh completes, start the application
-make dev
-
-# Or manually start both services:
-# Backend: cd backend && uvicorn API.main:app --reload --port 8100 &
-# Frontend: cd frontend && npm run dev
-\`\`\`
-
-### Manual Environment Configuration (If needed)
-\`\`\`bash
-# Set your API keys (if not done via setup.sh)
-export E2B_API_KEY=your_e2b_key
-export OPENAI_API_KEY=your_openai_key
-
-# Optional: Custom API URL for frontend
-export NEXT_PUBLIC_API_URL=http://localhost:8100
-\`\`\`
-
-### Access Atlas
-- **Frontend Interface**: http://localhost:3100
-- **API Documentation**: http://localhost:8100/docs
-- **Health Check**: http://localhost:8100/api/health
-
-### First Browser Automation
-1. Click **"Create Session"** to start E2B desktop
-2. Wait for desktop preview to load in the right panel
-3. Type in chat: *"Please search for 'artificial intelligence' on Google"*
-4. Watch AI control the browser in real-time! 🎉
-
-### Alternative Quick Start (Without setup.sh)
+### Alternative Quick Start (Manual)
 \`\`\`bash
 # Manual setup if you prefer not to use setup.sh
-git clone https://github.com/your-org/atlas.git
-cd atlas
+git clone https://github.com/AutoAgents-Algorithm-Group/Hera.git
+cd Hera
 
 # Install dependencies
 cd frontend && npm install && cd ..
 cd backend && pip install -r requirements.txt && cd ..
-
-# Set environment variables
-export E2B_API_KEY=your_e2b_key
-export OPENAI_API_KEY=your_openai_key
 
 # Start services
 make dev
@@ -262,135 +222,48 @@ chmod +x setup.sh
 
 ## Deployment Section
 
-### Atlas Deployment Template
+### Hera Deployment Template
 ```markdown
 ## Deployment
 
 ### Docker Deployment (Recommended)
-
-#### Production Deployment with Docker Compose
 \`\`\`bash
-# 1. 创建部署目录
-mkdir -p /path/to/deployment/frank
-cd frank
-
-# 2. 下载项目包
-wget -P /root/frank https://your-cdn.com/Atlas.zip
-unzip Atlas.zip -x "__MACOSX/*"
-
-# 3. 进入项目目录
-cd Atlas
-
-# 4. 启动服务
+cd Hera
 docker compose -f docker/docker-compose.yml up -d
-
-# 5. 查看应用日志
-docker compose -f docker/docker-compose.yml logs -f app
 \`\`\`
 
-#### Environment Variables
+### Troubleshooting
 \`\`\`bash
-# Required - Set in docker-compose.yml or .env file
-E2B_API_KEY=your_e2b_api_key
-OPENAI_API_KEY=your_openai_key
+# View application logs
+docker compose -f docker/docker-compose.yml logs -f app
 
-# Optional
-FRONTEND_PORT=3100
-BACKEND_PORT=8100
-NODE_ENV=production
+# Stop and remove old containers
+docker stop hera && docker rm hera
+docker rmi hera-app
 \`\`\`
 
 ### Service Management
-
-#### 查看服务状态
 \`\`\`bash
-# 检查运行状态
+# Check running status
 docker compose -f docker/docker-compose.yml ps
 
-# 查看实时日志
+# View real-time logs
 docker compose -f docker/docker-compose.yml logs -f
 
-# 重启服务
+# Restart services
 docker compose -f docker/docker-compose.yml restart
-\`\`\`
-
-#### 停止和清理
-\`\`\`bash
-# 停止所有服务
-docker compose -f docker/docker-compose.yml down
-
-# 完全清理（包括卷）
-docker compose -f docker/docker-compose.yml down -v
-
-# 清理未使用的镜像
-docker image prune -f
-\`\`\`
-
-### Production Configuration
-
-#### Security Checklist
-- [ ] Configure HTTPS/SSL certificates
-- [ ] Set secure CORS origins
-- [ ] Use environment variables for secrets
-- [ ] Enable rate limiting
-- [ ] Configure proper logging
-
-#### Performance Optimization
-- [ ] Enable gzip compression
-- [ ] Configure CDN for static assets
-- [ ] Monitor resource usage
-- [ ] Implement health checks
-
-### Monitoring & Maintenance
-- **Health Checks**: Access via `/api/health` endpoint
-- **Logs**: Use `docker compose logs -f` for real-time monitoring
-- **Metrics**: Monitor E2B usage and API calls
-- **Updates**: Regular dependency updates and security patches
-
-### Troubleshooting
-
-#### 清理旧容器和镜像
-\`\`\`bash
-# 停止并删除旧容器
-docker stop atlas && docker rm atlas
-
-# 删除旧镜像
-docker rmi atlas-app
-
-# 清理所有未使用的容器和镜像
-docker system prune -f
-\`\`\`
-
-#### 常见问题解决
-\`\`\`bash
-# 如果端口冲突
-docker compose -f docker/docker-compose.yml down
-# 修改 docker-compose.yml 中的端口映射
-
-# 如果容器启动失败
-docker compose -f docker/docker-compose.yml logs app
-
-# 重新构建镜像
-docker compose -f docker/docker-compose.yml build --no-cache
-
-# 如果权限问题（setup.sh）
-chmod +x setup.sh
-./setup.sh
 \`\`\`
 ```
 
 ### Deployment Documentation Guidelines
 - **Docker-focused**: Primarily Docker Compose deployment workflow
-- **Download-based**: Pre-built package distribution instead of git clone
 - **Service management**: Complete container lifecycle management
-- **Security focused**: Production security considerations
-- **Monitoring included**: Real-time logs and health checks
 - **Troubleshooting**: Common deployment issues and solutions
 
 ## Content Writing Best Practices
 
 ### 1. Structure
-- **Logical flow**: Introduction → Why Atlas → Quick Start → Architecture → Deployment
+- **Logical flow**: Introduction → Why Hera → Quick Start → Deployment → Contributing → License
 - **Scannable**: Use headers, lists, and code blocks
 - **Progressive disclosure**: Basic first, advanced details later
 
@@ -414,10 +287,10 @@ chmod +x setup.sh
 
 ## Header Design Guidelines
 
-### Atlas Logo Badge
-Use the specific Atlas logo badge with clean color scheme:
+### Hera Logo Badge
+Use the specific Hera logo badge with clean color scheme:
 ```markdown
-<img src="https://img.shields.io/badge/-Atlas-000000?style=for-the-badge&labelColor=faf9f6&color=faf9f6&logoColor=000000" alt="Atlas" width="280"/>
+<img src="https://img.shields.io/badge/-Hera-000000?style=for-the-badge&labelColor=faf9f6&color=faf9f6&logoColor=000000" alt="Hera" width="280"/>
 ```
 
 **Color Specifications:**
@@ -451,7 +324,6 @@ Use local SVG files for better performance and consistency:
 
 When writing README content, reference other project files:
 - **Setup Script**: [setup.sh](mdc:setup.sh) - **PRIMARY** interactive project configuration script
-- **Start Script**: [docker/start.sh](mdc:docker/start.sh) - Application startup automation
 - **Build System**: [Makefile](mdc:Makefile) - Development and deployment commands
 - **Docker**: [docker/docker-compose.yml](mdc:docker/docker-compose.yml) - Container orchestration
 - **Backend API**: [backend/API/main.py](mdc:backend/API/main.py) - Main API entry point
@@ -460,7 +332,7 @@ When writing README content, reference other project files:
 - **License Assets**: [media/light_license.svg](mdc:media/light_license.svg) and [media/dark_license.svg](mdc:media/dark_license.svg) - Theme-aware license badges
 
 ### README File Organization
-Atlas project maintains bilingual documentation:
+Hera project maintains bilingual documentation:
 1. **README.md**: English version (primary document)
 2. **README-CN.md**: Chinese version (完整中文文档)
 3. **Language switching**: Clear navigation between versions
@@ -477,5 +349,5 @@ Atlas project maintains bilingual documentation:
 ### Setup Script Usage Priority
 Always prioritize [setup.sh](mdc:setup.sh) in documentation:
 1. **Development setup**: `./setup.sh` for local development
-2. **Production deployment**: Download-based Docker deployment 
+2. **Production deployment**: Docker deployment with docker-compose
 3. **Manual alternative**: Step-by-step instructions for advanced users

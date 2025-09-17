@@ -200,9 +200,9 @@ Atlas uses **ResizablePanel** layout for the main interface:
 - **Responsive**: Mobile-friendly with proper breakpoints
 
 ### 3. API Integration
-Backend API runs on port 8100, configure in environment:
+Backend API runs on port 8000, configure in environment:
 ```tsx
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8100'
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 // Use consistent error handling
 try {
