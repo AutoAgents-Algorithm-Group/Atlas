@@ -1,0 +1,251 @@
+---
+globs: frontend/**/*.tsx,frontend/**/*.ts,frontend/messages/*.json,frontend/i18n.ts,frontend/middleware.ts
+---
+
+# Frontend Component Development Guidelines
+
+## 🎨 UI Component Library
+
+Atlas uses **Shadcn/UI** built on **Radix UI primitives** with **Tailwind CSS**. All UI components are located in [frontend/components/ui/](mdc:frontend/components/ui/).
+
+### Component Architecture
+- **Core Components**: [frontend/components/](mdc:frontend/components/) - Main application components
+- **UI Primitives**: [frontend/components/ui/](mdc:frontend/components/ui/) - Reusable Shadcn/UI components
+- **Layout**: [frontend/app/layout.tsx](mdc:frontend/app/layout.tsx) - Root layout with Inter font
+- **Utilities**: [frontend/lib/utils.ts](mdc:frontend/lib/utils.ts) - Utility functions with clsx and tailwind-merge
+
+### Key Application Components
+- **ChatArea**: [frontend/components/ChatArea.tsx](mdc:frontend/components/ChatArea.tsx) - Main chat interface
+- **ChatInput**: [frontend/components/ChatInput.tsx](mdc:frontend/components/ChatInput.tsx) - Message input component
+- **ChatHeader**: [frontend/components/ChatHeader.tsx](mdc:frontend/components/ChatHeader.tsx) - Chat header with controls
+- **Sidebar**: [frontend/components/Sidebar.tsx](mdc:frontend/components/Sidebar.tsx) - Navigation sidebar
+- **Artifacts**: [frontend/components/Artifacts.tsx](mdc:frontend/components/Artifacts.tsx) - File/artifact display
+
+## Internationalization (i18n)
+
+Atlas supports **English** and **Chinese** using **next-intl** with automatic locale detection and routing.
+
+### Configuration Files
+
+#### Core Setup
+- **i18n Config**: [frontend/i18n.ts](mdc:frontend/i18n.ts) - Defines supported locales and default
+- **Middleware**: [frontend/middleware.ts](mdc:frontend/middleware.ts) - Handles locale detection and routing
+- **Localized Routes**: [frontend/app/[locale]/](mdc:frontend/app/[locale]/) - Pages with locale-specific routing
+
+#### Supported Locales
+- **English**: `en` (default)
+- **Chinese**: `zh` (Simplified Chinese)
+
+### Message Files
+
+#### Structure
+All translations are stored in JSON files with nested structure:
+
+**English Messages**: [frontend/messages/en.json](mdc:frontend/messages/en.json)
+**Chinese Messages**: [frontend/messages/zh.json](mdc:frontend/messages/zh.json)
+
+#### Message Organization Pattern
+```json
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success"
+  },
+  "chat": {
+    "title": "Chat with AI",
+    "input": {
+      "placeholder": "Type your message...",
+      "send": "Send"
+    },
+    "status": {
+      "connected": "Connected",
+      "disconnected": "Disconnected"
+    }
+  },
+  "desktop": {
+    "title": "Desktop Preview",
+    "controls": {
+      "takeover": "Take Over",
+      "release": "Release"
+    }
+  }
+}
+```
+
+### Usage Patterns
+
+#### 1. Component Translation
+```tsx
+import { useTranslations } from 'next-intl';
+
+export default function ChatComponent() {
+  const t = useTranslations('chat');
+  
+  return (
+    <div>
+      <h1>{t('title')}</h1>
+      <input placeholder={t('input.placeholder')} />
+      <button>{t('input.send')}</button>
+    </div>
+  );
+}
+```
+
+#### 2. Multiple Translation Namespaces
+```tsx
+import { useTranslations } from 'next-intl';
+
+export default function Component() {
+  const tCommon = useTranslations('common');
+  const tChat = useTranslations('chat');
+  
+  return (
+    <div>
+      <h1>{tChat('title')}</h1>
+      <p>{tCommon('loading')}</p>
+    </div>
+  );
+}
+```
+
+#### 3. Translation with Variables
+```json
+{
+  "user": {
+    "welcome": "Welcome, {name}!",
+    "count": "You have {count, plural, =0 {no messages} =1 {one message} other {# messages}}"
+  }
+}
+```
+
+```tsx
+const t = useTranslations('user');
+<p>{t('welcome', { name: 'John' })}</p>
+<p>{t('count', { count: 5 })}</p>
+```
+
+### Development Workflow
+
+#### 1. Adding New Translations
+When adding new UI text:
+1. **Never hardcode strings** - always use translation keys
+2. **Add to both** [en.json](mdc:frontend/messages/en.json) and [zh.json](mdc:frontend/messages/zh.json)
+3. **Use descriptive keys**: `component.section.element` format
+4. **Group related translations** under common namespaces
+
+#### 2. Key Naming Conventions
+```json
+{
+  "componentName": {
+    "section": {
+      "element": "Translation text",
+      "action": "Action text"
+    }
+  }
+}
+```
+
+Examples:
+- `chat.input.placeholder`
+- `desktop.controls.takeover`
+- `files.download.success`
+- `session.status.active`
+
+#### 3. Language Switcher
+Atlas includes a [frontend/components/LanguageSwitcher.tsx](mdc:frontend/components/LanguageSwitcher.tsx) component for locale switching.
+
+### Best Practices
+
+#### 1. Consistent Structure
+- Keep the same structure across all language files
+- Use nested objects for logical grouping
+- Maintain alphabetical order within sections
+
+#### 2. Translation Quality
+- **English**: Use clear, concise language
+- **Chinese**: Use Simplified Chinese characters
+- **Context**: Provide meaningful translations that fit the UI context
+- **Consistency**: Use the same terms throughout the application
+
+#### 3. Missing Translations
+- Always provide fallbacks
+- Use English as the default for missing keys
+- Add placeholder text during development: `"key": "TODO: Translate"`
+
+#### 4. File Maintenance
+- Keep files synchronized - every key in English should exist in Chinese
+- Remove unused translation keys
+- Use consistent formatting and indentation
+- Test both languages regularly during development
+
+## 🔧 Development Patterns
+
+### 1. Shadcn/UI Component Usage
+```tsx
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ResizablePanel, ResizablePanelGroup, ResizableHandle } from "@/components/ui/resizable"
+
+// Use consistent className patterns with Tailwind
+<Button variant="default" size="sm" className="w-full">
+  {t('button.text')}
+</Button>
+```
+
+### 2. Layout Structure
+Atlas uses **ResizablePanel** layout for the main interface:
+- **Left Panel**: Chat interface 
+- **Right Panel**: Desktop preview + file management tabs
+- **Responsive**: Mobile-friendly with proper breakpoints
+
+### 3. API Integration
+Backend API runs on port 8100, configure in environment:
+```tsx
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8100'
+
+// Use consistent error handling
+try {
+  const response = await fetch(`${API_BASE}/api/endpoint`)
+  const data = await response.json()
+} catch (error) {
+  console.error('API Error:', error)
+}
+```
+
+### 4. Component Organization
+- Keep components focused and single-responsibility
+- Use TypeScript interfaces for props
+- Implement proper error boundaries
+- Follow Shadcn/UI patterns for consistency
+
+## 📱 Responsive Design
+
+### Breakpoints (Tailwind)
+- **Mobile**: Default styles, use mobile-first approach
+- **Tablet**: `md:` prefix for 768px+
+- **Desktop**: `lg:` prefix for 1024px+
+- **Wide**: `xl:` prefix for 1280px+
+
+### Mobile Hook
+Use [frontend/hooks/use-mobile.ts](mdc:frontend/hooks/use-mobile.ts) for responsive behavior:
+```tsx
+import { useMobile } from "@/hooks/use-mobile"
+
+export default function Component() {
+  const isMobile = useMobile()
+  
+  return (
+    <div className={isMobile ? "mobile-layout" : "desktop-layout"}>
+      {/* Responsive content */}
+    </div>
+  )
+}
+```
+
+## 🎯 Performance Best Practices
+- Use React.memo for expensive components
+- Implement proper loading states
+- Optimize images with Next.js Image component
+- Use Suspense for code splitting
+- Follow Next.js App Router patterns
