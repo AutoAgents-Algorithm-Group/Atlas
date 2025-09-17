@@ -1,0 +1,401 @@
+---
+globs: README.md
+---
+
+# README Documentation Guidelines
+
+This rule provides guidance for creating and maintaining comprehensive README documentation for the Atlas project.
+
+## 📑 README Structure Template
+
+### Standard README Layout
+```markdown
+# Project Title
+Brief project description and main value proposition
+
+## 📋 Table of Contents
+- [Features](#features)
+- [Quick Start](#quick-start)
+- [Deployment](#deployment)
+- [Contributing](#contributing)
+- [License](#license)
+
+## ✨ Features
+## 🚀 Quick Start
+## 🐳 Deployment
+## 🤝 Contributing
+## 📄 License
+```
+
+## 🗂️ Catalog (Table of Contents)
+
+### Essential Sections
+- **Features**: Highlight key capabilities and benefits
+- **Quick Start**: Get users running in < 5 minutes
+- **Deployment**: Production deployment guides
+- **Contributing**: Guidelines for contributors
+- **License**: Project licensing information
+
+### Atlas-Specific Sections
+```markdown
+## 📋 Table of Contents
+- [🤖 About Atlas](#about-atlas)
+- [✨ Features](#features)
+- [🚀 Quick Start](#quick-start)
+- [🏗️ Architecture](#architecture)
+- [🐳 Deployment](#deployment)
+- [🛠️ Development](#development)
+- [🤝 Contributing](#contributing)
+- [📄 License](#license)
+```
+
+### 🔧 Setup Script Emphasis
+**CRITICAL**: Always prominently feature the `setup.sh` script in Atlas documentation:
+- Position it as the **primary installation method**
+- Explain its 4-step configuration process
+- Provide manual alternatives as secondary options
+- Reference it in deployment sections as well
+
+### Setup Script Documentation Template
+```markdown
+## 🔧 Interactive Setup with setup.sh
+
+Atlas includes a powerful interactive setup script that automates the entire configuration process:
+
+\`\`\`bash
+# Run the setup script
+chmod +x setup.sh
+./setup.sh
+\`\`\`
+
+The setup script guides you through **4 essential steps**:
+
+### 📋 Step 1: Project Configuration
+- Customize project name and branding
+- Configure project-specific settings
+- Set up directory structure
+
+### 🔌 Step 2: Port Configuration  
+- **Frontend Port**: Default 3100 (customizable)
+- **Backend Port**: Default 8100 (customizable)
+- Automatic port conflict detection
+- Updates all configuration files
+
+### 📦 Step 3: Dependencies Installation
+- **Frontend**: Automatic `npm install`
+- **Backend**: Automatic `pip install -r requirements.txt`
+- Dependency verification and troubleshooting
+
+### 📄 Step 4: Summary & Next Steps
+- Configuration summary display
+- Environment file creation
+- Ready-to-run status confirmation
+
+### Benefits of Using setup.sh
+- ✅ **Zero Manual Configuration**: Fully automated setup
+- ✅ **Error Prevention**: Validates configurations before proceeding
+- ✅ **Time Saving**: Complete setup in under 2 minutes
+- ✅ **Beginner Friendly**: Interactive prompts guide users
+- ✅ **Consistent Environment**: Ensures proper configuration across systems
+```
+
+## ✨ Features Section
+
+### Feature Documentation Pattern
+```markdown
+## ✨ Features
+
+### 🤖 AI-Powered Browser Automation
+- **Natural Language Control**: Chat with AI to control browser operations
+- **E2B Cloud Desktop**: Isolated cloud environment for safe automation
+- **Real-time Preview**: Watch AI actions via desktop streaming
+
+### 💬 Modern Chat Interface
+- **Intuitive UI**: ChatGPT-style conversation interface
+- **Multilingual**: English and Chinese language support
+- **Real-time Status**: Live session and connection status
+
+### 🖥️ Desktop Management
+- **Session Control**: Create, pause, resume, and destroy sessions
+- **Take Over Mode**: Switch between AI control and manual control
+- **File Management**: Download and manage generated files
+
+### 🔧 Developer Features
+- **Modular API**: Clean FastAPI router architecture
+- **Docker Support**: Containerized deployment ready
+- **Open Source**: MIT licensed with full source access
+```
+
+### Feature Writing Guidelines
+- **Use action-oriented headlines**: What users can DO
+- **Include benefits**: Why each feature matters
+- **Be specific**: Avoid vague marketing language
+- **Group logically**: Related features together
+- **Use emojis**: Visual hierarchy and engagement
+
+## 🚀 Quick Start Section
+
+### Atlas Quick Start Template
+```markdown
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 18+ and npm
+- Python 3.11+
+- E2B API key ([Get one here](https://e2b.dev))
+- OpenAI API key
+
+### 🔧 Automated Setup with setup.sh (Recommended)
+
+The easiest way to get Atlas running is using our interactive setup script:
+
+\`\`\`bash
+# 1. Clone the repository
+git clone https://github.com/your-org/atlas.git
+cd atlas
+
+# 2. Make setup script executable and run it
+chmod +x setup.sh
+./setup.sh
+\`\`\`
+
+The setup script will guide you through:
+- ✅ **Project Configuration**: Customize project name and settings
+- ✅ **Port Configuration**: Set frontend (default: 3100) and backend (default: 8100) ports
+- ✅ **Dependencies Installation**: Automatically install frontend and backend dependencies
+- ✅ **Environment Setup**: Create necessary configuration files
+
+### 🚀 Start Development
+\`\`\`bash
+# After setup.sh completes, start the application
+make dev
+
+# Or manually start both services:
+# Backend: cd backend && uvicorn API.main:app --reload --port 8100 &
+# Frontend: cd frontend && npm run dev
+\`\`\`
+
+### 🔑 Manual Environment Configuration (If needed)
+\`\`\`bash
+# Set your API keys (if not done via setup.sh)
+export E2B_API_KEY=your_e2b_key
+export OPENAI_API_KEY=your_openai_key
+
+# Optional: Custom API URL for frontend
+export NEXT_PUBLIC_API_URL=http://localhost:8100
+\`\`\`
+
+### 🌐 Access Atlas
+- **Frontend Interface**: http://localhost:3100
+- **API Documentation**: http://localhost:8100/docs
+- **Health Check**: http://localhost:8100/api/health
+
+### 🤖 First Browser Automation
+1. Click **"Create Session"** to start E2B desktop
+2. Wait for desktop preview to load in the right panel
+3. Type in chat: *"Please search for 'artificial intelligence' on Google"*
+4. Watch AI control the browser in real-time! 🎉
+
+### ⚡ Alternative Quick Start (Without setup.sh)
+\`\`\`bash
+# Manual setup if you prefer not to use setup.sh
+git clone https://github.com/your-org/atlas.git
+cd atlas
+
+# Install dependencies
+cd frontend && npm install && cd ..
+cd backend && pip install -r requirements.txt && cd ..
+
+# Set environment variables
+export E2B_API_KEY=your_e2b_key
+export OPENAI_API_KEY=your_openai_key
+
+# Start services
+make dev
+\`\`\`
+
+**Note**: If you later want to use setup.sh, remember to make it executable first:
+\`\`\`bash
+chmod +x setup.sh
+./setup.sh
+\`\`\`
+```
+
+### Quick Start Best Practices
+- **setup.sh First**: Always recommend the interactive setup script as the primary method
+- **chmod Required**: Always include `chmod +x setup.sh` before running the script
+- **Time-boxed**: User should be running in < 5 minutes
+- **Copy-paste ready**: All commands should work exactly as written
+- **Prerequisites clear**: What users need before starting
+- **Alternative methods**: Provide manual setup for users who prefer it
+- **Verification steps**: How to know it's working
+- **Next steps**: Where to go after quick start
+
+## 🚀 Deployment Section
+
+### Atlas Deployment Template
+```markdown
+## 🚀 Deployment
+
+### 🐳 Docker Deployment (Recommended)
+
+#### Production Deployment with Docker Compose
+\`\`\`bash
+# 1. 创建部署目录
+mkdir -p /path/to/deployment/frank
+cd frank
+
+# 2. 下载项目包
+wget -P /root/frank https://your-cdn.com/Atlas.zip
+unzip Atlas.zip -x "__MACOSX/*"
+
+# 3. 进入项目目录
+cd Atlas
+
+# 4. 启动服务
+docker compose -f docker/docker-compose.yml up -d
+
+# 5. 查看应用日志
+docker compose -f docker/docker-compose.yml logs -f app
+\`\`\`
+
+#### Environment Variables
+\`\`\`bash
+# Required - Set in docker-compose.yml or .env file
+E2B_API_KEY=your_e2b_api_key
+OPENAI_API_KEY=your_openai_key
+
+# Optional
+FRONTEND_PORT=3100
+BACKEND_PORT=8100
+NODE_ENV=production
+\`\`\`
+
+### 🔧 Service Management
+
+#### 查看服务状态
+\`\`\`bash
+# 检查运行状态
+docker compose -f docker/docker-compose.yml ps
+
+# 查看实时日志
+docker compose -f docker/docker-compose.yml logs -f
+
+# 重启服务
+docker compose -f docker/docker-compose.yml restart
+\`\`\`
+
+#### 停止和清理
+\`\`\`bash
+# 停止所有服务
+docker compose -f docker/docker-compose.yml down
+
+# 完全清理（包括卷）
+docker compose -f docker/docker-compose.yml down -v
+
+# 清理未使用的镜像
+docker image prune -f
+\`\`\`
+
+### 🔒 Production Configuration
+
+#### Security Checklist
+- [ ] Configure HTTPS/SSL certificates
+- [ ] Set secure CORS origins
+- [ ] Use environment variables for secrets
+- [ ] Enable rate limiting
+- [ ] Configure proper logging
+
+#### Performance Optimization
+- [ ] Enable gzip compression
+- [ ] Configure CDN for static assets
+- [ ] Monitor resource usage
+- [ ] Implement health checks
+
+### 📊 Monitoring & Maintenance
+- **Health Checks**: Access via `/api/health` endpoint
+- **Logs**: Use `docker compose logs -f` for real-time monitoring
+- **Metrics**: Monitor E2B usage and API calls
+- **Updates**: Regular dependency updates and security patches
+
+### 🚨 Troubleshooting
+
+#### 清理旧容器和镜像
+\`\`\`bash
+# 停止并删除旧容器
+docker stop atlas && docker rm atlas
+
+# 删除旧镜像
+docker rmi atlas-app
+
+# 清理所有未使用的容器和镜像
+docker system prune -f
+\`\`\`
+
+#### 常见问题解决
+\`\`\`bash
+# 如果端口冲突
+docker compose -f docker/docker-compose.yml down
+# 修改 docker-compose.yml 中的端口映射
+
+# 如果容器启动失败
+docker compose -f docker/docker-compose.yml logs app
+
+# 重新构建镜像
+docker compose -f docker/docker-compose.yml build --no-cache
+
+# 如果权限问题（setup.sh）
+chmod +x setup.sh
+./setup.sh
+\`\`\`
+```
+
+### Deployment Documentation Guidelines
+- **Docker-focused**: Primarily Docker Compose deployment workflow
+- **Download-based**: Pre-built package distribution instead of git clone
+- **Service management**: Complete container lifecycle management
+- **Security focused**: Production security considerations
+- **Monitoring included**: Real-time logs and health checks
+- **Troubleshooting**: Common deployment issues and solutions
+
+## 📝 Content Writing Best Practices
+
+### 1. Structure
+- **Logical flow**: Introduction → Features → Quick Start → Architecture → Deployment
+- **Scannable**: Use headers, lists, and code blocks
+- **Progressive disclosure**: Basic first, advanced details later
+
+### 2. Code Examples
+- **Working examples**: All code should be copy-paste ready
+- **Syntax highlighting**: Use proper language tags
+- **Context**: Explain what each example does
+- **Multiple formats**: CLI commands, API calls, config files
+
+### 3. Visual Elements
+- **Emojis**: Use consistently for section headers
+- **Badges**: Build status, version, license
+- **Screenshots**: Key UI elements and workflows
+- **Diagrams**: Architecture and flow diagrams
+
+### 4. User-Focused Writing
+- **Benefits first**: What users can achieve
+- **Clear language**: Avoid jargon when possible
+- **Action-oriented**: Tell users what to DO
+- **Troubleshooting**: Common issues and solutions
+
+## 🔗 Cross-References
+
+When writing README content, reference other project files:
+- **🔧 Setup Script**: [setup.sh](mdc:setup.sh) - **PRIMARY** interactive project configuration script
+- **🚀 Start Script**: [docker/start.sh](mdc:docker/start.sh) - Application startup automation
+- **🏗️ Build System**: [Makefile](mdc:Makefile) - Development and deployment commands
+- **🐳 Docker**: [docker/docker-compose.yml](mdc:docker/docker-compose.yml) - Container orchestration
+- **⚙️ Backend API**: [backend/API/main.py](mdc:backend/API/main.py) - Main API entry point
+- **🎨 Frontend**: [frontend/app/layout.tsx](mdc:frontend/app/layout.tsx) - UI layout
+- **📦 Dependencies**: [backend/requirements.txt](mdc:backend/requirements.txt) and [frontend/package.json](mdc:frontend/package.json)
+
+### Setup Script Usage Priority
+Always prioritize [setup.sh](mdc:setup.sh) in documentation:
+1. **Development setup**: `./setup.sh` for local development
+2. **Production deployment**: Download-based Docker deployment 
+3. **Manual alternative**: Step-by-step instructions for advanced users

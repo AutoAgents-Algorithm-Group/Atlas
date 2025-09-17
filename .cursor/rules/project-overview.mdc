@@ -1,0 +1,41 @@
+---
+alwaysApply: true
+---
+
+# Atlas Project Overview
+
+Atlas is an AI-powered browser automation chat application that uses E2B cloud desktops for browser control through natural language interaction.
+
+## 🏗️ Architecture
+
+### Backend (FastAPI + Python)
+- **Entry point**: [backend/API/main.py](mdc:backend/API/main.py)
+- **Core agent**: [backend/Agent/unified_agent.py](mdc:backend/Agent/unified_agent.py) - Integrates desktop management and browser automation
+- **Desktop management**: [backend/Desktop/manager.py](mdc:backend/Desktop/manager.py) - E2B desktop session management
+- **Browser engine**: [backend/Engine/browser_runner.py](mdc:backend/Engine/browser_runner.py) - Browser automation engine
+- **Modular API structure**: All routes organized in [backend/API/routers/](mdc:backend/API/routers/) directory
+
+### Frontend (Next.js + TypeScript)
+- **Main layout**: [frontend/app/layout.tsx](mdc:frontend/app/layout.tsx)
+- **Components**: [frontend/components/](mdc:frontend/components/) - Modern chat interface with Shadcn/UI
+- **Internationalization**: Supports English and Chinese via [frontend/messages/](mdc:frontend/messages/)
+- **Layout**: ResizablePanel design with chat interface + desktop preview
+
+## 🔗 Key Integrations
+- **E2B Cloud Desktop**: Remote browser execution environment
+- **Browser Use AI**: Natural language browser automation
+- **Shadcn/UI**: Modern React component library
+- **FastAPI Routers**: Modular API endpoints (/api/session, /api/chat, /api/files, /api/desktop, /api/system)
+
+## 🚀 Development Workflow
+- **Setup**: Use `./setup.sh` for initial configuration
+- **Start**: Use `make dev` or `./start.sh` for development
+- **Frontend**: Runs on port 3100, backend on port 8100
+- **Dependencies**: [backend/requirements.txt](mdc:backend/requirements.txt) and [frontend/package.json](mdc:frontend/package.json)
+
+## 📁 Core File Paths
+- Backend API: `backend/API/routers/*.py`
+- Frontend Components: `frontend/components/*.tsx`
+- Agent Logic: `backend/Agent/unified_agent.py`
+- Desktop Management: `backend/Desktop/manager.py`
+- UI Components: `frontend/components/ui/*.tsx` (Shadcn/UI)

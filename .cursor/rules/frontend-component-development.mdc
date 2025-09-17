@@ -1,0 +1,120 @@
+---
+globs: frontend/**/*.tsx,frontend/**/*.ts
+---
+
+# Frontend Component Development Guidelines
+
+## 🎨 UI Component Library
+
+Atlas uses **Shadcn/UI** built on **Radix UI primitives** with **Tailwind CSS**. All UI components are located in [frontend/components/ui/](mdc:frontend/components/ui/).
+
+### Component Architecture
+- **Core Components**: [frontend/components/](mdc:frontend/components/) - Main application components
+- **UI Primitives**: [frontend/components/ui/](mdc:frontend/components/ui/) - Reusable Shadcn/UI components
+- **Layout**: [frontend/app/layout.tsx](mdc:frontend/app/layout.tsx) - Root layout with Inter font
+- **Utilities**: [frontend/lib/utils.ts](mdc:frontend/lib/utils.ts) - Utility functions with clsx and tailwind-merge
+
+### Key Application Components
+- **ChatArea**: [frontend/components/ChatArea.tsx](mdc:frontend/components/ChatArea.tsx) - Main chat interface
+- **ChatInput**: [frontend/components/ChatInput.tsx](mdc:frontend/components/ChatInput.tsx) - Message input component
+- **ChatHeader**: [frontend/components/ChatHeader.tsx](mdc:frontend/components/ChatHeader.tsx) - Chat header with controls
+- **Sidebar**: [frontend/components/Sidebar.tsx](mdc:frontend/components/Sidebar.tsx) - Navigation sidebar
+- **Artifacts**: [frontend/components/Artifacts.tsx](mdc:frontend/components/Artifacts.tsx) - File/artifact display
+
+## 🌍 Internationalization
+
+Atlas supports **English** and **Chinese** using **next-intl**:
+
+### i18n Configuration
+- **Setup**: [frontend/i18n.ts](mdc:frontend/i18n.ts) - Next-intl configuration
+- **Middleware**: [frontend/middleware.ts](mdc:frontend/middleware.ts) - Locale detection
+- **Messages**: 
+  - English: [frontend/messages/en.json](mdc:frontend/messages/en.json)
+  - Chinese: [frontend/messages/zh.json](mdc:frontend/messages/zh.json)
+
+### Usage Pattern
+```tsx
+import { useTranslations } from 'next-intl';
+
+export default function Component() {
+  const t = useTranslations('ComponentName');
+  
+  return (
+    <div>
+      <h1>{t('title')}</h1>
+      <p>{t('description')}</p>
+    </div>
+  );
+}
+```
+
+## 🔧 Development Patterns
+
+### 1. Shadcn/UI Component Usage
+```tsx
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ResizablePanel, ResizablePanelGroup, ResizableHandle } from "@/components/ui/resizable"
+
+// Use consistent className patterns with Tailwind
+<Button variant="default" size="sm" className="w-full">
+  {t('button.text')}
+</Button>
+```
+
+### 2. Layout Structure
+Atlas uses **ResizablePanel** layout for the main interface:
+- **Left Panel**: Chat interface 
+- **Right Panel**: Desktop preview + file management tabs
+- **Responsive**: Mobile-friendly with proper breakpoints
+
+### 3. API Integration
+Backend API runs on port 8100, configure in environment:
+```tsx
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8100'
+
+// Use consistent error handling
+try {
+  const response = await fetch(`${API_BASE}/api/endpoint`)
+  const data = await response.json()
+} catch (error) {
+  console.error('API Error:', error)
+}
+```
+
+### 4. Component Organization
+- Keep components focused and single-responsibility
+- Use TypeScript interfaces for props
+- Implement proper error boundaries
+- Follow Shadcn/UI patterns for consistency
+
+## 📱 Responsive Design
+
+### Breakpoints (Tailwind)
+- **Mobile**: Default styles, use mobile-first approach
+- **Tablet**: `md:` prefix for 768px+
+- **Desktop**: `lg:` prefix for 1024px+
+- **Wide**: `xl:` prefix for 1280px+
+
+### Mobile Hook
+Use [frontend/hooks/use-mobile.ts](mdc:frontend/hooks/use-mobile.ts) for responsive behavior:
+```tsx
+import { useMobile } from "@/hooks/use-mobile"
+
+export default function Component() {
+  const isMobile = useMobile()
+  
+  return (
+    <div className={isMobile ? "mobile-layout" : "desktop-layout"}>
+      {/* Responsive content */}
+    </div>
+  )
+}
+```
+
+## 🎯 Performance Best Practices
+- Use React.memo for expensive components
+- Implement proper loading states
+- Optimize images with Next.js Image component
+- Use Suspense for code splitting
+- Follow Next.js App Router patterns

@@ -78,7 +78,7 @@ COPY --from=frontend-builder /app/frontend/public ./frontend/public
 COPY --from=frontend-builder /app/frontend/node_modules ./frontend/node_modules
 
 # 复制启动脚本
-COPY start.sh ./
+COPY docker/start.sh ./
 RUN chmod +x start.sh
 
 # 暴露端口

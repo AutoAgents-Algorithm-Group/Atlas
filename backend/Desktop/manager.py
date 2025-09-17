@@ -1,13 +1,7 @@
 import os
 import time
-import json
-import urllib.request
-import ssl
-
 from e2b_desktop import Sandbox
 
-
-os.environ["E2B_API_KEY"] = "e2b_c6bbe444d963e8db1dc680d8a45a35cc13e0e47e"
 
 class E2BDesktopManager:
     """

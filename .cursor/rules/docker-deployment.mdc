@@ -1,0 +1,188 @@
+---
+globs: docker/**/*,Dockerfile,docker-compose.yml,setup.sh,Makefile
+---
+
+# Docker & Deployment Configuration
+
+Atlas includes containerized deployment support and automation scripts for easy setup and deployment.
+
+## 🐳 Docker Configuration
+
+### Docker Files
+- **Dockerfile**: [docker/Dockerfile](mdc:docker/Dockerfile) - Container image definition
+- **Docker Compose**: [docker/docker-compose.yml](mdc:docker/docker-compose.yml) - Multi-service orchestration
+- **Build Context**: Project root contains source code for containerization
+
+### Container Architecture
+```yaml
+# Typical docker-compose.yml structure for Atlas
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "3100:3100"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend:8100
+  
+  backend:
+    build: ./backend
+    ports:
+      - "8100:8100"
+    environment:
+      - E2B_API_KEY=${E2B_API_KEY}
+```
+
+## 🛠️ Setup & Deployment Scripts
+
+### Project Setup
+**Setup Script**: [setup.sh](mdc:setup.sh)
+- Interactive project configuration
+- Environment variable setup
+- Dependency installation
+- Port configuration (default: frontend 3100, backend 8100)
+- Creates necessary config files
+
+### Application Startup
+**Start Script**: [docker/start.sh](mdc:docker/start.sh)
+- **Integrated into Docker**: Used as the main container startup command
+- Automated application startup for both backend and frontend
+- Backend and frontend service orchestration within container
+- Process management and monitoring with graceful shutdown
+- Production-optimized for containerized environments
+
+### Build Automation
+**Makefile**: [Makefile](mdc:Makefile)
+- Common development commands
+- Build targets for frontend/backend
+- Docker container management
+- Development environment setup
+
+```makefile
+# Common Makefile targets
+dev:           # Start development environment
+build:         # Build all services
+docker-build:  # Build Docker containers
+docker-up:     # Start with Docker Compose
+clean:         # Clean build artifacts
+```
+
+## 🚀 Deployment Workflows
+
+### 1. Local Development
+```bash
+# Quick setup and start
+./setup.sh
+make dev
+
+# Or manual startup (not recommended for production)
+./docker/start.sh
+```
+
+### 2. Docker Deployment
+```bash
+# Build and run with Docker Compose
+docker-compose -f docker/docker-compose.yml up --build
+
+# Or using Makefile
+make docker-up
+```
+
+### 3. Production Deployment
+```bash
+# Build production images
+docker build -f docker/Dockerfile -t atlas-app .
+
+# Deploy to production environment
+# Configure environment variables for production
+# Set up reverse proxy (nginx/traefik)
+# Configure SSL certificates
+```
+
+## 🔧 Configuration Management
+
+### Environment Variables
+```bash
+# Backend Configuration
+E2B_API_KEY=your_e2b_api_key
+OPENAI_API_KEY=your_openai_key
+PORT=8100
+
+# Frontend Configuration
+NEXT_PUBLIC_API_URL=http://localhost:8100
+PORT=3100
+```
+
+### Port Configuration
+- **Frontend**: Default port 3100 (configurable in package.json)
+- **Backend**: Default port 8100 (configurable in main.py)
+- **Docker**: Ports mapped 1:1 with host system
+
+### Service Dependencies
+1. **E2B Cloud Desktop**: Requires valid E2B API key
+2. **OpenAI API**: For Browser Use AI functionality
+3. **Network Access**: For E2B desktop streaming and API calls
+
+## 📦 Build Optimization
+
+### Frontend Build
+```dockerfile
+# Multi-stage build for Next.js
+FROM node:18-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+
+FROM node:18-alpine AS runner
+COPY --from=builder /app/node_modules ./node_modules
+COPY . .
+RUN npm run build
+EXPOSE 3100
+CMD ["npm", "start"]
+```
+
+### Backend Build
+```dockerfile
+# Python backend with FastAPI
+FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+COPY . .
+EXPOSE 8100
+CMD ["uvicorn", "API.main:app", "--host", "0.0.0.0", "--port", "8100"]
+```
+
+## 🔍 Health Checks & Monitoring
+
+### Health Check Endpoints
+- **Backend**: `/api/health` - FastAPI health status
+- **Frontend**: Next.js built-in health checks
+- **E2B**: Check desktop session status via `/api/status`
+
+### Docker Health Checks
+```dockerfile
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8100/api/health || exit 1
+```
+
+## 🚀 Deployment Best Practices
+
+### 1. Environment Separation
+- Use different environment files for dev/staging/production
+- Never commit sensitive credentials to version control
+- Use Docker secrets for production deployments
+
+### 2. Resource Management
+- Configure appropriate CPU/memory limits
+- Monitor E2B usage and costs
+- Implement proper logging and monitoring
+
+### 3. Network Security
+- Use HTTPS in production
+- Configure proper CORS origins
+- Implement rate limiting and authentication
+
+### 4. Backup & Recovery
+- Regular backup of configuration files
+- Document deployment procedures
+- Implement rollback strategies for updates

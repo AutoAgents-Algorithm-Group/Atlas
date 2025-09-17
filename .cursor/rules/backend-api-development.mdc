@@ -1,0 +1,89 @@
+---
+globs: backend/**/*.py
+---
+
+# Backend API Development Guidelines
+
+## 🏗️ Modular Router Architecture
+
+Atlas uses a **modular FastAPI router structure** where all API endpoints are organized by functionality:
+
+### Router Organization
+- **Session Management**: [backend/API/routers/session.py](mdc:backend/API/routers/session.py) - `/api/session/*`
+- **Chat Interface**: [backend/API/routers/chat.py](mdc:backend/API/routers/chat.py) - `/api/chat`
+- **File Operations**: [backend/API/routers/files.py](mdc:backend/API/routers/files.py) - `/api/files/*`
+- **Desktop Control**: [backend/API/routers/desktop.py](mdc:backend/API/routers/desktop.py) - `/api/desktop/*`
+- **System Status**: [backend/API/routers/system.py](mdc:backend/API/routers/system.py) - `/api/status`, `/api/health`, `/api/info`
+
+### Router Pattern
+```python
+from fastapi import APIRouter
+router = APIRouter(prefix="/api/your-module", tags=["your-module"])
+
+# Global unified agent instance (shared across all routers)
+unified_agent = None
+
+def init_router(agent):
+    global unified_agent
+    unified_agent = agent
+```
+
+## 🤖 Unified Agent System
+
+### Core Agent
+The [backend/Agent/unified_agent.py](mdc:backend/Agent/unified_agent.py) **E2BUnifiedAgent** integrates:
+- **Desktop Management**: E2B cloud desktop sessions
+- **Browser Automation**: Browser Use AI for natural language control
+- **File Tracking**: Automatic tracking of generated files
+- **Session State**: Persistent session management
+
+### Key Agent Methods
+- `create_desktop_session()` - Start E2B desktop and CDP proxy
+- `chat()` - Process natural language browser commands
+- `takeover_control()` / `release_control()` - Manual desktop control
+- `get_tracked_files()` - List generated files
+- `destroy_session()` - Clean up resources
+
+## 🔌 API Development Best Practices
+
+### 1. Router Registration
+All new routers must be registered in [backend/API/main.py](mdc:backend/API/main.py):
+```python
+from .routers import your_router, init_your_router
+
+# Initialize with unified agent
+init_your_router(unified_agent)
+
+# Register router
+app.include_router(your_router)
+```
+
+### 2. Error Handling
+Use consistent error handling patterns:
+```python
+from fastapi import HTTPException
+
+try:
+    result = unified_agent.some_method()
+    return {"success": True, "data": result}
+except Exception as e:
+    raise HTTPException(status_code=500, detail=str(e))
+```
+
+### 3. Agent State Management
+- Always check `unified_agent` is initialized before use
+- Use the shared `unified_agent` instance across all routers
+- Don't create multiple agent instances
+
+### 4. CORS Configuration
+Frontend runs on port 3100, backend on 8100. CORS is configured in [backend/API/main.py](mdc:backend/API/main.py) for:
+- `http://localhost:3100`
+- `http://127.0.0.1:3100` 
+- Production domains
+
+## 🔧 Dependencies
+Core dependencies defined in [backend/requirements.txt](mdc:backend/requirements.txt):
+- **FastAPI**: Web framework
+- **E2B Desktop**: Cloud desktop integration
+- **OpenAI**: AI model access
+- **Playwright/Selenium**: Browser automation backends
