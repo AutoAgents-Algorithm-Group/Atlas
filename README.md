@@ -1,194 +1,202 @@
-# Atlas - AI Browser Controller
+<div align="center">
 
-一个基于 E2B 云桌面的智能浏览器自动化聊天应用，使用自然语言与 AI 进行交互来控制浏览器操作。
+<img src="https://img.shields.io/badge/-Atlas-000000?style=for-the-badge&labelColor=faf9f6&color=faf9f6&logoColor=000000" alt="Atlas" width="280"/>
 
-## 📋 Table of Contents
+<h4>AI-Powered Browser Automation Platform</h4>
 
-- [🤖 About & Features](#-about--features)
-- [🚀 Quick Start](#-quick-start)
-- [🏗️ Architecture](#️-architecture)
-- [🐳 Deployment](#-deployment)
-- [🤝 Contributing](#-contributing)
-- [📄 License](#-license)
+**English** | [简体中文](README-CN.md)
 
-## 🤖 About & Features
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="media/dark_license.svg" />
+  <img alt="License MIT" src="media/light_license.svg" />
+</picture>
 
-Atlas 是一个革命性的 AI 浏览器控制器，让你可以通过自然语言对话来操控浏览器。基于 E2B 云桌面技术，Atlas 提供了安全、隔离的浏览器自动化环境，支持复杂的 Web 操作任务。
+</div>
 
-### 🎯 核心特性
+## Table of Contents
 
-#### 🤖 AI-Powered Browser Automation
-- **🗣️ 自然语言控制**：通过聊天对话控制浏览器操作，零编程门槛
-- **🛡️ E2B 云桌面**：安全隔离的云环境进行浏览器自动化
-- **👀 实时预览**：通过桌面流观看 AI 操作过程
+- [Why Atlas?](#why-atlas)
+- [Quick Start](#quick-start)
+- [Architecture](#architecture)
+- [Deployment](#deployment)
+- [Contributing](#contributing)
+- [License](#license)
 
-#### 💬 Modern Chat Interface
-- **✨ 直观界面**：类 ChatGPT 的对话体验
-- **🌍 多语言支持**：支持中英文界面切换
-- **📊 实时状态**：显示会话状态和连接状态
+## Why Atlas?
 
-#### 🖥️ Desktop Management
-- **⚙️ 会话控制**：创建、暂停、恢复和销毁会话
-- **🔄 Take Over 模式**：在 AI 控制和手动控制之间切换
-- **📁 文件管理**：下载和管理 AI 生成的文件
+Atlas is a revolutionary AI browser controller that allows you to control browser operations through natural language conversations. Based on E2B cloud desktop technology, Atlas provides a secure, isolated browser automation environment for complex web operation tasks.
 
-#### 🔧 Developer Features
-- **🏗️ 模块化 API**：清晰的 FastAPI 路由架构
-- **🐳 Docker 支持**：容器化部署就绪
-- **📜 开源项目**：MIT 许可证，完整源码访问
+- **Zero Programming Barrier**: Complete complex operations through conversation without writing code
+- **Secure and Reliable**: E2B cloud desktop ensures operational security and environment isolation
+- **Quick Deployment**: One-click Docker deployment with production environment support
+- **Flexible Control**: Seamless switching between AI automation and manual control
 
-### 💡 为什么选择 Atlas？
+## Architecture
 
-- **🎯 零编程门槛**：无需编写代码，通过对话即可完成复杂操作
-- **🛡️ 安全可靠**：E2B 云桌面确保操作安全性和环境隔离
-- **⚡ 快速部署**：一键 Docker 部署，支持生产环境
-- **🔄 灵活控制**：AI 自动化与手动控制无缝切换
+Atlas adopts a modern front-end and back-end separation architecture, combined with E2B cloud desktop technology, providing stable and reliable browser automation services.
 
-## 🚀 Quick Start
+### Backend (FastAPI + Python)
+- **Entry Point**: `backend/API/main.py` - FastAPI application main entry
+- **Core Agent**: `backend/Agent/unified_agent.py` - Integrates desktop management and browser automation
+- **Desktop Management**: `backend/Desktop/manager.py` - E2B desktop session management
+- **Browser Engine**: `backend/Engine/browser_runner.py` - Browser automation engine
+- **Modular API**: `backend/API/routers/` - Modular routing design
+
+### Frontend (Next.js + TypeScript)
+- **Main Layout**: `frontend/app/layout.tsx` - Application main layout
+- **Component Library**: `frontend/components/` - Modern components based on Shadcn/UI
+- **Internationalization**: `frontend/messages/` - Support for English and Chinese switching
+- **Responsive Design**: ResizablePanel layout with chat interface + desktop preview
+
+### Core Integrations
+- **E2B Cloud Desktop**: Remote browser execution environment
+- **Browser Use AI**: Natural language browser automation
+- **Shadcn/UI**: Modern React component library
+- **FastAPI Routers**: Modular API endpoint design
+
+## Quick Start
 
 ### Prerequisites
 - Node.js 18+ and npm
 - Python 3.11+
 
-### 📦 Installation & Setup
+### Installation & Setup
 
 ```bash
-# 1. 克隆项目
+# 1. Clone the repository
 git clone https://github.com/your-org/atlas.git
 cd atlas
 
-# 2. 安装依赖
+# 2. Install dependencies
 cd frontend && npm install && cd ..
 cd backend && pip install -r requirements.txt && cd ..
 
-# 3. 配置环境变量（见下方 Environment Configuration）
-# 创建 backend/.env 和 frontend/.env 文件
+# 3. Configure environment variables (see Environment Configuration below)
+# Create backend/.env and frontend/.env files
 
-# 4. 启动开发服务
+# 4. Start development services
 make dev
 ```
 
-### 🔑 Environment Configuration
+### Environment Configuration
 
-Atlas 采用前后端分离的环境变量配置方式，需要分别配置前端和后端的环境变量。
+Atlas uses a separated environment variable configuration approach for frontend and backend, requiring separate configuration for each.
 
-**目录结构**：
+**Directory Structure**:
 ```
 Atlas/
 ├── backend/
-│   ├── .env              # 后端环境变量
-│   └── .env.example      # 后端配置模板
+│   ├── .env              # Backend environment variables
+│   └── .env.example      # Backend configuration template
 └── frontend/
-    ├── .env              # 前端环境变量
-    └── .env.example      # 前端配置模板
+    ├── .env              # Frontend environment variables
+    └── .env.example      # Frontend configuration template
 ```
 
-**环境变量配置步骤**：
+**Environment Variable Setup Steps**:
 ```bash
 cp backend/.env.example backend/.env
 cp frontend/.env.example frontend/.env
 ```
 
-**注意事项**：
-- 将所有 `.env` 文件添加到 `.gitignore` 中，避免泄露 API 密钥
-- 将 `.env.example` 文件提交到版本控制作为配置模板
+**Important Notes**:
+- Add all `.env` files to `.gitignore` to avoid leaking API keys
+- Commit `.env.example` files to version control as configuration templates
 
+## Deployment
 
-## 🐳 Deployment
-
-### 🐳 Docker
+### Docker Deployment
 
 #### Production Deployment with Docker Compose
 ```bash
-# 1. 创建部署目录
+# 1. Create deployment directory
 mkdir -p /path/to/deployment/frank
 cd frank
 
-# 2. 下载项目包
+# 2. Download project package
 wget -P /root/frank https://your-cdn.com/Atlas.zip
 unzip Atlas.zip -x "__MACOSX/*"
 
-# 3. 进入项目目录
+# 3. Enter project directory
 cd Atlas
 
-# 4. 启动服务
+# 4. Start services
 docker compose -f docker/docker-compose.yml up -d
 
-# 5. 查看应用日志
+# 5. View application logs
 docker compose -f docker/docker-compose.yml logs -f app
 ```
 
 #### Environment Variables
 
-**配置方式：分别配置前后端环境变量**
+**Configuration Method: Separate frontend and backend environment variables**
 
-**后端环境变量**（`backend/.env`）：
+**Backend Environment Variables** (`backend/.env`):
 ```bash
 # backend/.env
-# ==================== 必需配置 ====================
+# ==================== Required Configuration ====================
 E2B_API_KEY=your_e2b_api_key
 OPENAI_API_KEY=your_openai_api_key
 
-# ==================== 可选配置 ====================
+# ==================== Optional Configuration ====================
 PORT=8100
 PYTHONPATH=/app/backend
 ```
 
-**前端环境变量**（`frontend/.env`）：
+**Frontend Environment Variables** (`frontend/.env`):
 ```bash
 # frontend/.env
-# ==================== 前端配置 ====================
+# ==================== Frontend Configuration ====================
 NEXT_PUBLIC_API_URL=http://localhost:8100
 
-# ==================== 可选配置 ====================
+# ==================== Optional Configuration ====================
 PORT=3100
 NODE_ENV=production
 ```
 
-**配置说明**：
-- `E2B_API_KEY`: 从 [E2B](https://e2b.dev) 获取的 API 密钥
-- `OPENAI_API_KEY`: 从 [OpenAI](https://platform.openai.com) 获取的 API 密钥
-- `NEXT_PUBLIC_API_URL`: 前端连接后端的 API 地址
+**Configuration Description**:
+- `E2B_API_KEY`: API key obtained from [E2B](https://e2b.dev)
+- `OPENAI_API_KEY`: API key obtained from [OpenAI](https://platform.openai.com)
+- `NEXT_PUBLIC_API_URL`: Frontend API address for connecting to backend
 
-**注意事项**：
-- `E2B_API_KEY` 和 `OPENAI_API_KEY` 是**必需的**，否则服务无法正常启动
-- 前端需要 `NEXT_PUBLIC_API_URL` 来连接后端 API
-- 生产环境建议使用 Docker Secrets 管理敏感信息
-- 确保将所有 `.env` 文件添加到 `.gitignore` 中
+**Important Notes**:
+- `E2B_API_KEY` and `OPENAI_API_KEY` are **required**, otherwise services will not start properly
+- Frontend requires `NEXT_PUBLIC_API_URL` to connect to backend API
+- Production environments should use Docker Secrets for managing sensitive information
+- Ensure all `.env` files are added to `.gitignore`
 
-#### 🚨 Troubleshooting
+#### Troubleshooting
 ```bash
-# 停止并删除旧容器
+# Stop and remove old containers
 docker stop atlas && docker rm atlas
 
-# 删除旧镜像
+# Remove old images
 docker rmi atlas-app
 
-# 清理所有未使用的容器和镜像
+# Clean up all unused containers and images
 docker system prune -f
 
-# 如果容器启动失败，查看日志
+# If container startup fails, check logs
 docker compose -f docker/docker-compose.yml logs app
 ```
 
+## Contributing
 
-## 🤝 Contributing
+We welcome community contributions! Please refer to [CONTRIBUTING.md](CONTRIBUTING.md) for detailed contribution guidelines.
 
-我们欢迎社区贡献！请查看 [CONTRIBUTING.md](CONTRIBUTING.md) 了解详细的贡献指南。
+### Development Workflow
+1. Fork this project
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Create a Pull Request
 
-### 开发流程
-1. Fork 本项目
-2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 创建 Pull Request
+## License
 
-## 📄 License
-
-本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-**享受 AI 驱动的浏览器自动化体验！** 🤖✨
+**Enjoy the AI-powered browser automation experience!**
 
-如有问题或建议，请通过 [Issues](https://github.com/your-org/atlas/issues) 联系我们。
+If you have any questions or suggestions, please contact us through [Issues](https://github.com/your-org/atlas/issues).

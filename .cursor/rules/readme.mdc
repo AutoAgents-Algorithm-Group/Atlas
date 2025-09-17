@@ -14,13 +14,13 @@ This rule provides guidance for creating and maintaining comprehensive README do
 Brief project description and main value proposition
 
 ## 📋 Table of Contents
-- [Features](#features)
+- [Why Atlas?](#why-atlas)
 - [Quick Start](#quick-start)
 - [Deployment](#deployment)
 - [Contributing](#contributing)
 - [License](#license)
 
-## ✨ Features
+## 🤔 Why Atlas
 ## 🚀 Quick Start
 ## 🐳 Deployment
 ## 🤝 Contributing
@@ -30,7 +30,7 @@ Brief project description and main value proposition
 ## 🗂️ Catalog (Table of Contents)
 
 ### Essential Sections
-- **Features**: Highlight key capabilities and benefits
+- **Why Atlas**: Highlight key capabilities, benefits, and value proposition
 - **Quick Start**: Get users running in < 5 minutes
 - **Deployment**: Production deployment guides
 - **Contributing**: Guidelines for contributors
@@ -39,8 +39,7 @@ Brief project description and main value proposition
 ### Atlas-Specific Sections
 ```markdown
 ## 📋 Table of Contents
-- [🤖 About Atlas](#about-atlas)
-- [✨ Features](#features)
+- [🤔 Why Atlas](#why-atlas)
 - [🚀 Quick Start](#quick-start)
 - [🏗️ Architecture](#architecture)
 - [🐳 Deployment](#deployment)
@@ -99,39 +98,53 @@ The setup script guides you through **4 essential steps**:
 - ✅ **Consistent Environment**: Ensures proper configuration across systems
 ```
 
-## ✨ Features Section
+## 🤔 Why Atlas Section
 
-### Feature Documentation Pattern
+### Why Atlas Documentation Pattern
 ```markdown
-## ✨ Features
+## 🤔 Why Atlas
 
-### 🤖 AI-Powered Browser Automation
-- **Natural Language Control**: Chat with AI to control browser operations
-- **E2B Cloud Desktop**: Isolated cloud environment for safe automation
-- **Real-time Preview**: Watch AI actions via desktop streaming
+Atlas 是一个革命性的 AI 浏览器控制器，让你可以通过自然语言对话来操控浏览器。基于 E2B 云桌面技术，Atlas 提供了安全、隔离的浏览器自动化环境，支持复杂的 Web 操作任务。
 
-### 💬 Modern Chat Interface
-- **Intuitive UI**: ChatGPT-style conversation interface
-- **Multilingual**: English and Chinese language support
-- **Real-time Status**: Live session and connection status
+### 🎯 核心特性
 
-### 🖥️ Desktop Management
-- **Session Control**: Create, pause, resume, and destroy sessions
-- **Take Over Mode**: Switch between AI control and manual control
-- **File Management**: Download and manage generated files
+#### 🤖 AI-Powered Browser Automation
+- **🗣️ 自然语言控制**：通过聊天对话控制浏览器操作，零编程门槛
+- **🛡️ E2B 云桌面**：安全隔离的云环境进行浏览器自动化
+- **👀 实时预览**：通过桌面流观看 AI 操作过程
 
-### 🔧 Developer Features
-- **Modular API**: Clean FastAPI router architecture
-- **Docker Support**: Containerized deployment ready
-- **Open Source**: MIT licensed with full source access
+#### 💬 Modern Chat Interface
+- **✨ 直观界面**：类 ChatGPT 的对话体验
+- **🌍 多语言支持**：支持中英文界面切换
+- **📊 实时状态**：显示会话状态和连接状态
+
+#### 🖥️ Desktop Management
+- **⚙️ 会话控制**：创建、暂停、恢复和销毁会话
+- **🔄 Take Over 模式**：在 AI 控制和手动控制之间切换
+- **📁 文件管理**：下载和管理 AI 生成的文件
+
+#### 🔧 Developer Features
+- **🏗️ 模块化 API**：清晰的 FastAPI 路由架构
+- **🐳 Docker 支持**：容器化部署就绪
+- **📜 开源项目**：MIT 许可证，完整源码访问
+
+### 💡 为什么选择 Atlas？
+
+- **🎯 零编程门槛**：无需编写代码，通过对话即可完成复杂操作
+- **🛡️ 安全可靠**：E2B 云桌面确保操作安全性和环境隔离
+- **⚡ 快速部署**：一键 Docker 部署，支持生产环境
+- **🔄 灵活控制**：AI 自动化与手动控制无缝切换
 ```
 
-### Feature Writing Guidelines
-- **Use action-oriented headlines**: What users can DO
-- **Include benefits**: Why each feature matters
-- **Be specific**: Avoid vague marketing language
-- **Group logically**: Related features together
+### Why Atlas Writing Guidelines
+- **Value proposition first**: Start with what Atlas enables users to achieve
+- **Problem-solution approach**: Highlight pain points and how Atlas solves them
+- **Use action-oriented headlines**: Focus on what users can DO
+- **Include concrete benefits**: Why each feature matters in practice
+- **Be specific**: Avoid vague marketing language, provide tangible outcomes
+- **Group logically**: Related features and benefits together
 - **Use emojis**: Visual hierarchy and engagement
+- **Show differentiation**: What makes Atlas unique compared to alternatives
 
 ## 🚀 Quick Start Section
 
@@ -361,7 +374,7 @@ chmod +x setup.sh
 ## 📝 Content Writing Best Practices
 
 ### 1. Structure
-- **Logical flow**: Introduction → Features → Quick Start → Architecture → Deployment
+- **Logical flow**: Introduction → Why Atlas → Quick Start → Architecture → Deployment
 - **Scannable**: Use headers, lists, and code blocks
 - **Progressive disclosure**: Basic first, advanced details later
 
