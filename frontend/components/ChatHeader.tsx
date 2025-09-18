@@ -2,11 +2,15 @@
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Computer, Share, MoreHorizontal, Download, FileText, Loader2 } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Computer, Share, Download, FileText, Loader2, User, Settings, LogOut, Sparkles, ChevronRight, RefreshCw, Brain, Home, HelpCircle, ExternalLink } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useTranslations, useLocale } from 'next-intl';
-import LanguageSwitcher from './LanguageSwitcher';
+import { useRouter, usePathname } from 'next/navigation';
+import { useState } from 'react';
+import ProfileDialog from './ProfileDialog';
 
 interface SandboxFile {
   name: string;
@@ -36,11 +40,157 @@ export default function ChatHeader({
 }: ChatHeaderProps) {
   const t = useTranslations();
   const locale = useLocale();
+  const router = useRouter();
+  const pathname = usePathname();
+  
+  // Dialog状态管理
+  const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
+
+  const handleLanguageChange = (newLocale: string) => {
+    try {
+      // 调试信息
+      console.log('Current locale:', locale);
+      console.log('Target locale:', newLocale);
+      console.log('Pathname:', pathname);
+      console.log('Window path:', window.location.pathname);
+      
+      // 方法1: 使用 Next.js router (推荐)
+      const currentPath = pathname || window.location.pathname;
+      const pathWithoutLocale = currentPath.replace(/^\/[a-z]{2}/, '');
+      const newPath = `/${newLocale}${pathWithoutLocale || ''}`;
+      
+      console.log('Attempting router.push to:', newPath);
+      router.push(newPath);
+      
+      // 方法2: 备用方案 - 直接刷新
+      setTimeout(() => {
+        if (window.location.pathname === currentPath) {
+          console.log('Router push failed, using window.location');
+          window.location.href = newPath;
+        }
+      }, 100);
+      
+    } catch (error) {
+      console.error('Language change error:', error);
+      // 最后的备用方案
+      const fallbackPath = `/${newLocale}`;
+      window.location.href = fallbackPath;
+    }
+  };
+
   return (
     <div className="h-16 px-6 flex items-center justify-between bg-[#faf9f6]">
-      {/* 左侧 Logo */}
+      {/* 左侧用户头像 */}
       <div className="flex items-center gap-3">
-        <h1 className="text-lg font-semibold text-gray-900">{t('header.title')}</h1>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <div className="relative group cursor-pointer">
+              <Avatar className="h-10 w-10 ring-2 ring-transparent hover:ring-gray-300 transition-all duration-300 relative overflow-hidden">
+                <AvatarImage src="/default-avatar.png" alt="User" />
+                <AvatarFallback className="bg-gradient-to-br from-gray-100 to-gray-200 text-gray-700 font-semibold text-sm">
+                  U
+                </AvatarFallback>
+                {/* 擦亮效果 */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
+              </Avatar>
+            </div>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-80 p-0 overflow-hidden">
+            {/* 用户信息头部 */}
+            <div className="p-4">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-12 w-12">
+                    <AvatarImage src="/default-avatar.png" alt="Frank" />
+                      <AvatarFallback className="bg-orange-100 text-orange-600 text-sm font-semibold">
+                        F
+                      </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-gray-900 text-sm">Frank</h3>
+                    <p className="text-xs text-gray-600 truncate">frank@autoagent.ai</p>
+                  </div>
+                </div>
+                <Button variant="ghost" size="sm" className="p-1 h-6 w-6">
+                  <RefreshCw className="h-3 w-3" />
+                </Button>
+              </div>
+
+              {/* Free 计划卡片 */}
+              <div className="bg-gray-50 rounded-lg p-3 mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-semibold text-gray-900 text-sm">Free</span>
+                  <Button size="sm" className="bg-black text-white hover:bg-gray-800 text-xs h-6 px-2">
+                    Upgrade
+                  </Button>
+                </div>
+                
+                {/* Credits */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="h-3 w-3 text-gray-600" />
+                    <span className="text-xs text-gray-600">Credits</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="font-semibold text-sm">1,300</span>
+                    <ChevronRight className="h-3 w-3 text-gray-400" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <DropdownMenuSeparator />
+
+            {/* Knowledge 部分 */}
+            <DropdownMenuItem className="flex items-center gap-3 px-4 py-2">
+              <Brain className="h-4 w-4 text-gray-600" />
+              <span className="text-sm">Knowledge</span>
+            </DropdownMenuItem>
+
+            <DropdownMenuSeparator />
+
+            {/* 菜单项 */}
+            <DropdownMenuItem 
+              className="flex items-center gap-3 px-4 py-2 cursor-pointer"
+              onSelect={() => setIsProfileDialogOpen(true)}
+            >
+              <User className="h-4 w-4 text-gray-600" />
+              <span className="text-sm">Account</span>
+            </DropdownMenuItem>
+            
+            <DropdownMenuItem className="flex items-center gap-3 px-4 py-2">
+              <Settings className="h-4 w-4 text-gray-600" />
+              <span className="text-sm">Settings</span>
+            </DropdownMenuItem>
+
+            <DropdownMenuSeparator />
+
+            {/* 外部链接 */}
+            <DropdownMenuItem className="flex items-center justify-between px-4 py-2">
+              <div className="flex items-center gap-3">
+                <Home className="h-4 w-4 text-gray-600" />
+                <span className="text-sm">Homepage</span>
+              </div>
+              <ExternalLink className="h-3 w-3 text-gray-400" />
+            </DropdownMenuItem>
+            
+            <DropdownMenuItem className="flex items-center justify-between px-4 py-2">
+              <div className="flex items-center gap-3">
+                <HelpCircle className="h-4 w-4 text-gray-600" />
+                <span className="text-sm">Get help</span>
+              </div>
+              <ExternalLink className="h-3 w-3 text-gray-400" />
+            </DropdownMenuItem>
+
+            <DropdownMenuSeparator />
+
+            {/* 退出登录 */}
+            <DropdownMenuItem className="flex items-center gap-3 px-4 py-2 text-red-600 hover:bg-red-50 focus:bg-red-50">
+              <LogOut className="h-4 w-4" />
+              <span className="text-sm">Sign out</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       
       {/* 中部 Session Title */}
@@ -55,7 +205,7 @@ export default function ChatHeader({
         {/* Files Dialog */}
         <Dialog open={isFilesDialogOpen} onOpenChange={setIsFilesDialogOpen}>
           <DialogTrigger asChild>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="cursor-pointer">
               <svg 
                 xmlns="http://www.w3.org/2000/svg" 
                 width="16" 
@@ -92,6 +242,7 @@ export default function ChatHeader({
                 disabled={isLoadingFiles || !isActive}
                 variant="outline"
                 size="sm"
+                className="cursor-pointer"
               >
                 {isLoadingFiles ? (
                   <Loader2 className="h-3 w-3 animate-spin" />
@@ -132,7 +283,7 @@ export default function ChatHeader({
                           onClick={() => downloadFile(file)}
                           variant="outline"
                           size="sm"
-                          className="ml-3"
+                          className="ml-3 cursor-pointer"
                         >
                           <Download className="h-4 w-4" />
                         </Button>
@@ -150,14 +301,13 @@ export default function ChatHeader({
           <Share className="h-4 w-4" />
         </Button>
         
-        {/* Language Switcher */}
-        <LanguageSwitcher currentLocale={locale} />
-        
-        {/* More Menu */}
-        <Button variant="outline" className='cursor-pointer' size="sm">
-          <MoreHorizontal className="h-4 w-4" />
-        </Button>
       </div>
+
+      {/* Profile Dialog */}
+      <ProfileDialog 
+        isOpen={isProfileDialogOpen} 
+        onClose={() => setIsProfileDialogOpen(false)} 
+      />
     </div>
   );
 }

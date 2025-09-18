@@ -5,7 +5,7 @@ import urllib.request
 import ssl
 
 
-class BrowseUseRunner:
+class BrowseUseExecutor:
     """
     本地运行的 browser-use 执行器：连 E2B 公开的 9223（通过 /json/version 获取 ws 端点），
     然后用自然语言任务驱动浏览器。支持代理失败时的备用连接方案。

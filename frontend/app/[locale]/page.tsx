@@ -33,7 +33,7 @@ interface SandboxFile {
   type: string;
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8100';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 export default function ChatPage() {
   const t = useTranslations();
@@ -142,7 +142,30 @@ export default function ChatPage() {
     }
   };
 
-  // destroySession function removed as no longer needed
+  // 终止会话
+  const terminateSession = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/api/session/terminate`, {
+        method: 'DELETE',
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setStreamUrl('');
+        setIsActive(false);
+        setIsInitialized(false);
+        setChatHistory([]);
+        setSandboxFiles([]);
+        toast.success(t('messages.sessionTerminatedSuccess'));
+      } else {
+        toast.error(data.error || t('messages.backendConnectFailed'));
+      }
+    } catch (error) {
+      console.error('Error terminating session:', error);
+      toast.error(t('messages.backendConnectFailed'));
+    }
+  };
 
   // 发送消息
   const sendMessage = async () => {
@@ -414,6 +437,7 @@ export default function ChatPage() {
           currentBrowserUrl={currentBrowserUrl}
           createSession={createSession}
           resumeSession={resumeSession}
+          terminateSession={terminateSession}
           handlePreviousStep={handlePreviousStep}
           handleNextStep={handleNextStep}
         />

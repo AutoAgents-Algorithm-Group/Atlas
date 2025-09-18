@@ -72,7 +72,7 @@ export default function ChatInput({
                 key={index}
                 variant="outline"
                 size="sm"
-                className="text-xs h-8 hover:bg-gray-100"
+                className="text-xs h-8 hover:bg-gray-100 cursor-pointer"
                 onClick={() => setCurrentMessage(msg)}
               >
                 {msg.length > 30 ? msg.substring(0, 30) + '...' : msg}
@@ -112,7 +112,7 @@ export default function ChatInput({
               type="submit" 
               onMouseEnter={() => setIsHovering(true)}
               onMouseLeave={() => setIsHovering(false)}
-              className="p-2 rounded-full text-white transition-all duration-200 min-h-[36px] min-w-[36px] flex items-center justify-center"
+              className="p-2 rounded-full text-white transition-all duration-200 min-h-[36px] min-w-[36px] flex items-center justify-center cursor-pointer"
               style={{
                 backgroundColor: canSend || isSending
                   ? (isHovering ? '#4d4d4d' : '#000000') 

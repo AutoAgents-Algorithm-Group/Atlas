@@ -5,7 +5,7 @@ import tempfile
 from typing import Optional, Dict, Any
 
 from Desktop.manager import E2BDesktopManager
-from Engine.browser_runner import BrowseUseRunner
+from Engine.browser_runner import BrowseUseExecutor
 
 
 class E2BUnifiedAgent:
@@ -131,7 +131,7 @@ class E2BUnifiedAgent:
                 }
             
             # 创建Browser Use runner
-            self.browser_runner = BrowseUseRunner(
+            self.browser_runner = BrowseUseExecutor(
                 task=task,
                 external_cdp_base=self.external_cdp_base,
                 backup_chrome_base=self.backup_chrome_base
@@ -602,8 +602,8 @@ class E2BUnifiedAgent:
         except Exception as e:
             return {"success": False, "error": str(e)}
     
-    def destroy_session(self):
-        """彻底销毁沙盒会话（原cleanup逻辑）"""
+    def terminate_session(self):
+        """彻底终止沙盒会话（原cleanup逻辑）"""
         try:
             if self.desktop_manager.desk:
                 self.desktop_manager.desk.kill()
@@ -612,8 +612,8 @@ class E2BUnifiedAgent:
                 self._initialized = False
                 # 清空临时文件列表
                 self._temp_files = []
-                return {"success": True, "message": "Desktop session destroyed"}
+                return {"success": True, "message": "Desktop session terminated"}
             else:
-                return {"success": True, "message": "No active session to destroy"}
+                return {"success": True, "message": "No active session to terminate"}
         except Exception as e:
             return {"success": False, "error": str(e)}

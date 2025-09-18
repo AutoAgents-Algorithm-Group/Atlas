@@ -12,9 +12,11 @@ import {
   Check,
   Globe,
   SkipBack,
-  SkipForward
+  SkipForward,
+  Power
 } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useTranslations } from 'next-intl';
 
 interface ArtifactsProps {
@@ -29,6 +31,7 @@ interface ArtifactsProps {
   currentBrowserUrl: string;
   createSession: () => void;
   resumeSession: () => void;
+  terminateSession: () => void;
   handlePreviousStep: () => void;
   handleNextStep: () => void;
 }
@@ -45,6 +48,7 @@ export default function Artifacts({
   currentBrowserUrl,
   createSession,
   resumeSession,
+  terminateSession,
   handlePreviousStep,
   handleNextStep
 }: ArtifactsProps) {
@@ -86,18 +90,44 @@ export default function Artifacts({
             
             {/* 会话控制按钮 */}
             <div className="flex gap-2">
-              <Button
-                onClick={isActive ? resumeSession : createSession}
-                disabled={isCreatingSession}
-                size="sm"
-              >
-                {isCreatingSession ? (
-                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                ) : (
-                  <Play className="h-4 w-4 mr-1" />
-                )}
-                {t('artifacts.startSession')}
-              </Button>
+              {/* 启动会话按钮 */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    onClick={isActive ? resumeSession : createSession}
+                    disabled={isCreatingSession}
+                    size="sm"
+                    className="bg-black text-white hover:bg-gray-800 border-black cursor-pointer"
+                  >
+                    {isCreatingSession ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Play className="h-4 w-4" />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{t('header.startSessionTooltip')}</p>
+                </TooltipContent>
+              </Tooltip>
+
+              {/* 终止会话按钮 */}
+              {isActive && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      size="sm" 
+                      onClick={terminateSession}
+                      className="bg-black text-red-400 hover:bg-gray-800 hover:text-red-300 border-black cursor-pointer"
+                    >
+                      <Power className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{t('header.terminateTooltip')}</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
             </div>
           </div>
         </CardHeader>
@@ -178,7 +208,7 @@ export default function Artifacts({
                   disabled={currentStep <= 1}
                   variant="ghost"
                   size="sm"
-                  className="h-8 w-8 p-0"
+                  className="h-8 w-8 p-0 cursor-pointer"
                 >
                   <SkipBack className="h-4 w-4" />
                 </Button>
@@ -187,7 +217,7 @@ export default function Artifacts({
                   disabled={currentStep >= totalSteps}
                   variant="ghost"
                   size="sm" 
-                  className="h-8 w-8 p-0"
+                  className="h-8 w-8 p-0 cursor-pointer"
                 >
                   <SkipForward className="h-4 w-4" />
                 </Button>

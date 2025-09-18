@@ -1,4 +1,4 @@
 # Engine Module
-from .browser_runner import BrowseUseRunner
+from .browser_runner import BrowseUseExecutor
 
-__all__ = ['BrowseUseRunner']
+__all__ = ['BrowseUseExecutor']

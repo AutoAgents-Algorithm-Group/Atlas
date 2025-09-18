@@ -73,11 +73,11 @@ async def resume_session():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to resume session: {str(e)}")
 
-@router.delete("/destroy")
-async def destroy_session():
-    """彻底销毁浏览器会话"""
+@router.delete("/terminate")
+async def terminate_session():
+    """彻底终止浏览器会话"""
     try:
-        result = unified_agent.destroy_session()
+        result = unified_agent.terminate_session()
         return result
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to destroy session: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to terminate session: {str(e)}")
