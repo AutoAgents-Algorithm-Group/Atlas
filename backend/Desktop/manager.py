@@ -44,7 +44,12 @@ class E2BDesktopManager:
             timeout=60000
         )
         self.desk.stream.start(require_auth=True)
-        self.live_url = self.desk.stream.get_url(auth_key=self.desk.stream.get_auth_key())
+        self.live_url = self.desk.stream.get_url(
+            auth_key=self.desk.stream.get_auth_key(),
+            view_only=False  # 默认只读模式，防止意外操作
+        )
+        self.current_view_only = False  # 跟踪当前的view_only状态
+
         print("\n=== 桌面直播地址（可观看整个过程） ===")
         print(self.live_url)
         print("=====================================\n")
@@ -359,3 +364,48 @@ web.run_app(app, host='0.0.0.0', port=9223)
             print("✗ 本地代理连接失败")
             
         print("==================\n")
+    
+    def set_view_only(self, view_only: bool):
+        """
+        设置桌面流的view_only模式
+        
+        Args:
+            view_only: True表示用户可以操作，False表示只读模式
+        """
+        try:
+            if not self.desk:
+                print("❌ 没有活动的桌面会话")
+                return False
+            
+            # 更新view_only状态
+            self.current_view_only = view_only
+            
+            # 重新生成stream URL
+            try:
+                new_url = self.desk.stream.get_url(
+                    auth_key=self.desk.stream.get_auth_key(),
+                    view_only=(not view_only)  # E2B的逻辑是相反的：view_only=True表示只能观看
+                )
+                self.live_url = new_url
+                
+                mode = "可操作" if view_only else "只读"
+                print(f"✅ 桌面模式已切换为: {mode}")
+                print(f"📺 新的直播地址: {new_url}")
+                
+                return True
+                
+            except Exception as e:
+                print(f"❌ 更新stream URL失败: {e}")
+                return False
+                
+        except Exception as e:
+            print(f"❌ 设置view_only模式失败: {e}")
+            return False
+    
+    def get_current_view_only_status(self):
+        """获取当前的view_only状态"""
+        return {
+            "view_only": self.current_view_only,
+            "mode": "可操作" if self.current_view_only else "只读",
+            "live_url": self.live_url
+        }

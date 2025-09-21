@@ -22,6 +22,12 @@ class E2BUnifiedAgent:
         self.backup_chrome_base = None
         self._initialized = False
         self._temp_files = []  # 跟踪browser-use agent生成的临时文件
+        
+        # 人工接管相关状态
+        self.takeover_active = False  # 是否处于人工接管状态
+        self.intervention_needed = False  # 是否需要人工干预
+        self.intervention_reason = ""  # 需要干预的原因
+        self.automation_paused = False  # 自动化是否暂停
     
     def create_desktop_session(self):
         """创建E2B desktop会话并返回stream URL (兼容原API)"""
@@ -131,6 +137,7 @@ class E2BUnifiedAgent:
                 }
             
             # 创建Browser Use runner
+            print("📝 使用标准Browser Use执行器")
             self.browser_runner = BrowseUseExecutor(
                 task=task,
                 external_cdp_base=self.external_cdp_base,
@@ -142,82 +149,120 @@ class E2BUnifiedAgent:
             from concurrent.futures import ThreadPoolExecutor
             
             def run_browser_task():
-                """在单独线程中运行browser-use任务"""
+                """在单独线程中运行browser-use任务，支持人工干预检测"""
                 try:
-                    # 延迟导入，避免无关环境报错
-                    from browser_use import Agent, Browser, ChatOpenAI
-
-                    ws = self.browser_runner.fetch_ws_endpoint()
-                    llm = ChatOpenAI(
-                        model=self.browser_runner.model, 
-                        temperature=0,
-                        base_url=self.browser_runner.base_url,
-                        api_key=self.browser_runner.api_key
-                    )
+                    # 检查是否需要暂停自动化
+                    if self.automation_paused:
+                        return {
+                            "success": False,
+                            "paused": True,
+                            "message": "自动化已暂停，等待人工操作完成",
+                            "intervention_needed": self.intervention_needed,
+                            "intervention_reason": self.intervention_reason
+                        }
                     
-                    # 直接执行原始任务
-                    task_to_execute = task
+                    # 使用标准执行器
+                    print(f"🚀 使用标准Browser Use执行器运行任务: {task[:50]}...")
                     
-                    # 使用重试机制执行任务
-                    max_retries = 2  # 减少重试次数，避免长时间等待
-                    last_error = None
+                    # 检测任务是否包含需要人工干预的关键词
+                    intervention_keywords = [
+                        "password", "密码", "验证码", "captcha", "verification", 
+                        "two-factor", "2fa", "otp", "sms code", "email verification",
+                        "手机验证", "邮箱验证", "短信验证", "身份验证", "两步验证", "双重验证"
+                    ]
                     
-                    for attempt in range(max_retries):
-                        try:
-                            browser = Browser(cdp_url=ws)
-                            agent = Agent(task=task_to_execute, llm=llm, browser=browser)
-                            
-                            print(f"🚀 开始执行任务 (尝试 {attempt + 1}/{max_retries}): {task_to_execute}")
-                            result = agent.run_sync()
-                            
-                            return {
-                                "success": True,
-                                "message": "Task completed successfully",
-                                "result": str(result)[:800] + "..." if len(str(result)) > 800 else str(result),
-                                "task": task
-                            }
-                            
-                        except Exception as e:
-                            last_error = e
-                            error_str = str(e)
-                            print(f"❌ 任务执行失败 (尝试 {attempt + 1}/{max_retries}): {error_str[:200]}...")
-                            
-                            # 检查是否是连接问题
-                            if "websocket" in error_str.lower() or "connection" in error_str.lower():
-                                if attempt < max_retries - 1:
-                                    print(f"🔄 检测到连接问题，等待 5 秒后重新连接...")
-                                    time.sleep(5)
-                                    
-                                    # 重新获取WebSocket端点
-                                    try:
-                                        ws = self.browser_runner.fetch_ws_endpoint()
-                                        print("✅ 重新获取WebSocket端点成功")
-                                    except Exception as reconnect_error:
-                                        print(f"❌ 重新获取端点失败: {reconnect_error}")
-                                        continue
-                            else:
-                                # 其他错误，直接返回
-                                break
+                    task_lower = task.lower()
+                    needs_intervention = any(keyword in task_lower for keyword in intervention_keywords)
                     
-                    # 失败处理
-                    if "websocket" in str(last_error).lower() or "connection" in str(last_error).lower():
+                    if needs_intervention and not self.takeover_active:
+                        # 检测到需要人工干预的任务
+                        self.intervention_needed = True
+                        self.intervention_reason = "检测到需要输入密码或验证码，建议切换到人工操作模式"
+                        self.automation_paused = True
+                        
+                        return {
+                            "success": False,
+                            "intervention_needed": True,
+                            "intervention_reason": self.intervention_reason,
+                            "message": "🔐 检测到需要人工干预的操作（密码/验证码），请点击 Take Over 按钮进行手动操作",
+                            "suggested_action": "takeover",
+                            "task": task
+                        }
+                    
+                    # 正常执行任务
+                    result = self.browser_runner.run()
+                    
+                    # 检查结果中是否包含需要人工干预的提示
+                    result_str = str(result).lower()
+                    intervention_phrases = [
+                        "enter password", "input password", "verification code",
+                        "captcha", "human verification", "please verify",
+                        "输入密码", "请输入密码", "验证码", "人机验证"
+                    ]
+                    
+                    if any(phrase in result_str for phrase in intervention_phrases):
+                        self.intervention_needed = True
+                        self.intervention_reason = "执行过程中遇到需要人工验证的页面"
+                        
+                        return {
+                            "success": True,
+                            "result": str(result)[:800] + "..." if len(str(result)) > 800 else str(result),
+                            "intervention_needed": True,
+                            "intervention_reason": self.intervention_reason,
+                            "message": "🔐 任务执行中遇到验证页面，建议切换到人工操作模式",
+                            "suggested_action": "takeover",
+                            "task": task
+                        }
+                    
+                    return {
+                        "success": True,
+                        "message": "Task completed successfully",
+                        "result": str(result)[:800] + "..." if len(str(result)) > 800 else str(result),
+                        "task": task,
+                        "intervention_needed": False
+                    }
+                        
+                except Exception as e:
+                    error_str = str(e)
+                    print(f"❌ 任务执行失败: {error_str[:200]}...")
+                    
+                    # 检查错误是否与验证相关
+                    verification_errors = [
+                        "login failed", "authentication", "verification", 
+                        "登录失败", "身份验证", "验证失败"
+                    ]
+                    
+                    if any(err in error_str.lower() for err in verification_errors):
+                        self.intervention_needed = True
+                        self.intervention_reason = "遇到身份验证相关错误，可能需要人工处理"
+                        
+                        return {
+                            "success": False,
+                            "error": str(e)[:200],
+                            "intervention_needed": True,
+                            "intervention_reason": self.intervention_reason,
+                            "message": "🔐 执行失败：可能需要人工处理身份验证问题",
+                            "suggested_action": "takeover"
+                        }
+                    
+                    if "timeout" in error_str.lower() or "watchdog" in error_str.lower():
+                        return {
+                            "success": False,
+                            "error": "Input timeout",
+                            "message": "文本输入超时。E2B WebSocket连接可能不稳定，请稍后重试。"
+                        }
+                    elif "websocket" in error_str.lower() or "connection" in error_str.lower():
                         return {
                             "success": False,
                             "error": "Connection timeout",
-                            "message": "任务执行时连接超时。E2B WebSocket连接不稳定，请稍后重试或尝试更简单的任务。"
+                            "message": "连接超时。E2B WebSocket连接不稳定，请稍后重试或检查网络连接。"
                         }
                     else:
                         return {
                             "success": False,
-                            "error": str(last_error)[:200],
-                            "message": f"任务执行失败: {str(last_error)[:200]}..."
+                            "error": str(e)[:200],
+                            "message": f"任务执行失败: {str(e)[:200]}..."
                         }
-                except Exception as e:
-                    return {
-                        "success": False,
-                        "error": str(e),
-                        "message": f"Failed to execute task: {task}"
-                    }
             
             # 在线程池中执行，避免阻塞异步事件循环
             loop = asyncio.get_event_loop()
@@ -328,138 +373,9 @@ class E2BUnifiedAgent:
             }
     
     def list_sandbox_files(self, directory="/home/user"):
-        """列出沙盒中的文件"""
-        try:
-            # 如果没有沙盒会话，但有临时文件，仍然返回临时文件
-            if not self.desktop_manager or not self.desktop_manager.desk:
-                temp_files = []
-                for temp_file in self._temp_files:
-                    temp_files.append({
-                        "name": temp_file["name"],
-                        "path": temp_file["path"],
-                        "size": temp_file["size"],
-                        "type": temp_file["type"],
-                        "is_temp": True
-                    })
-                
-                if temp_files:
-                    return {
-                        "success": True,
-                        "warning": "No active sandbox session, showing agent output files only",
-                        "files": temp_files,
-                        "directory": directory,
-                        "temp_files_count": len(temp_files)
-                    }
-                else:
-                    return {
-                        "success": False,
-                        "error": "No active sandbox session",
-                        "files": []
-                    }
-            
-            # E2B文件系统访问方式
-            try:
-                # 尝试使用E2B的文件API列出文件
-                try:
-                    file_items = self.desktop_manager.desk.files.list(directory)
-                    files = []
-                    
-                    for item in file_items:
-                        # 检查是否是文件且不是隐藏文件
-                        if hasattr(item, 'is_dir') and not item.is_dir and not item.name.startswith('.'):
-                            files.append({
-                                "name": item.name,
-                                "path": f"{directory.rstrip('/')}/{item.name}",
-                                "size": getattr(item, 'size', 0),
-                                "type": "file"
-                            })
-                    
-                    # 添加临时文件到列表中（E2B文件API成功分支）
-                    for temp_file in self._temp_files:
-                        files.append({
-                            "name": temp_file["name"],
-                            "path": temp_file["path"],
-                            "size": temp_file["size"],
-                            "type": temp_file["type"],
-                            "is_temp": True
-                        })
-                    
-                    return {
-                        "success": True,
-                        "files": files,
-                        "directory": directory,
-                        "temp_files_count": len(self._temp_files)
-                    }
-                    
-                except Exception as files_api_error:
-                    print(f"E2B文件API失败，使用命令行方式: {files_api_error}")
-                    
-                    # 使用 commands.run 执行bash命令列出文件
-                    result = self.desktop_manager.desk.commands.run(f"find {directory} -maxdepth 1 -type f -exec ls -la {{}} \\;")
-                    files = []
-                    
-                    if result.exit_code == 0:
-                        lines = result.stdout.strip().split('\n')
-                        for line in lines:
-                            if line.strip():
-                                # 解析 ls -la 输出
-                                parts = line.split()
-                                if len(parts) >= 9:
-                                    size = int(parts[4]) if parts[4].isdigit() else 0
-                                    filename = ' '.join(parts[8:])
-                                    filepath = f"{directory.rstrip('/')}/{filename}" if not filename.startswith('/') else filename
-                                    
-                                    # 只处理文件名不以.开头的文件
-                                    if not filename.startswith('.'):
-                                        files.append({
-                                            "name": filename,
-                                            "path": filepath,
-                                            "size": size,
-                                            "type": "file"
-                                        })
-                    
-                    return {
-                        "success": True,
-                        "files": files,
-                        "directory": directory
-                    }
-            
-            except Exception as cmd_error:
-                # 最后的备用方案：尝试简单的ls命令
-                try:
-                    result = self.desktop_manager.desk.commands.run(f"ls -la {directory}")
-                    files = []
-                    
-                    if result.exit_code == 0:
-                        lines = result.stdout.strip().split('\n')[1:]  # 跳过总计行
-                        for line in lines:
-                            if line.strip() and not line.startswith('d'):  # 不是目录
-                                parts = line.split()
-                                if len(parts) >= 9:
-                                    filename = ' '.join(parts[8:])
-                                    if not filename.startswith('.') and filename not in ['.', '..']:
-                                        files.append({
-                                            "name": filename,
-                                            "path": f"{directory.rstrip('/')}/{filename}",
-                                            "size": int(parts[4]) if parts[4].isdigit() else 0,
-                                            "type": "file"
-                                        })
-                    
-                    return {
-                        "success": True,
-                        "files": files,
-                        "directory": directory
-                    }
-                    
-                except Exception as fallback_error:
-                    return {
-                        "success": False,
-                        "error": f"Failed to list files: {str(fallback_error)}",
-                        "files": []
-                    }
-            
-        except Exception as e:
-            # 即使出错，也尝试返回临时文件
+        """列出沙盒中的文件，优雅地处理没有活动会话的情况"""
+        def prepare_temp_files():
+            """准备临时文件列表的辅助函数"""
             temp_files = []
             for temp_file in self._temp_files:
                 temp_files.append({
@@ -469,21 +385,115 @@ class E2BUnifiedAgent:
                     "type": temp_file["type"],
                     "is_temp": True
                 })
-            
-            if temp_files:
+            return temp_files
+        
+        temp_files = prepare_temp_files()
+        
+        try:
+            # 如果没有沙盒会话，只返回临时文件
+            if not self.desktop_manager or not self.desktop_manager.desk:
+                print(f"📁 没有活动沙盒会话，返回 {len(temp_files)} 个临时文件")
                 return {
                     "success": True,
-                    "error": f"Sandbox files unavailable: {str(e)}",
+                    "warning": "No active sandbox session, showing agent output files only" if temp_files else "No active session and no files available",
                     "files": temp_files,
                     "directory": directory,
-                    "temp_files_count": len(temp_files)
+                    "temp_files_count": len(temp_files),
+                    "session_active": False
                 }
-            else:
-                return {
-                    "success": False,
-                    "error": str(e),
-                    "files": []
-                }
+            
+            sandbox_files = []
+            session_active = True
+            
+            # 尝试获取沙盒文件
+            try:
+                # 方法1：使用E2B的文件API
+                try:
+                    file_items = self.desktop_manager.desk.files.list(directory)
+                    for item in file_items:
+                        if hasattr(item, 'is_dir') and not item.is_dir and not item.name.startswith('.'):
+                            sandbox_files.append({
+                                "name": item.name,
+                                "path": f"{directory.rstrip('/')}/{item.name}",
+                                "size": getattr(item, 'size', 0),
+                                "type": "file"
+                            })
+                    print(f"📂 通过E2B API获取到 {len(sandbox_files)} 个沙盒文件")
+                    
+                except Exception as files_api_error:
+                    print(f"E2B文件API失败: {files_api_error}")
+                    
+                    # 方法2：使用find命令
+                    try:
+                        result = self.desktop_manager.desk.commands.run(f"find {directory} -maxdepth 1 -type f ! -name '.*'")
+                        if result.exit_code == 0:
+                            for line in result.stdout.strip().split('\n'):
+                                if line.strip():
+                                    filename = line.split('/')[-1]
+                                    if filename:
+                                        sandbox_files.append({
+                                            "name": filename,
+                                            "path": line.strip(),
+                                            "size": 0,  # find命令不返回文件大小
+                                            "type": "file"
+                                        })
+                        print(f"📂 通过find命令获取到 {len(sandbox_files)} 个沙盒文件")
+                        
+                    except Exception as find_error:
+                        print(f"find命令失败: {find_error}")
+                        
+                        # 方法3：使用ls命令
+                        try:
+                            result = self.desktop_manager.desk.commands.run(f"ls -la {directory} 2>/dev/null")
+                            if result.exit_code == 0:
+                                lines = result.stdout.strip().split('\n')[1:]  # 跳过总计行
+                                for line in lines:
+                                    if line.strip() and not line.startswith('d'):  # 不是目录
+                                        parts = line.split()
+                                        if len(parts) >= 9:
+                                            filename = ' '.join(parts[8:])
+                                            if not filename.startswith('.') and filename not in ['.', '..']:
+                                                sandbox_files.append({
+                                                    "name": filename,
+                                                    "path": f"{directory.rstrip('/')}/{filename}",
+                                                    "size": int(parts[4]) if parts[4].isdigit() else 0,
+                                                    "type": "file"
+                                                })
+                            print(f"📂 通过ls命令获取到 {len(sandbox_files)} 个沙盒文件")
+                            
+                        except Exception as ls_error:
+                            print(f"ls命令也失败: {ls_error}")
+                            session_active = False
+                            
+            except Exception as sandbox_error:
+                print(f"沙盒文件访问完全失败: {sandbox_error}")
+                session_active = False
+            
+            # 合并沙盒文件和临时文件
+            all_files = sandbox_files + temp_files
+            
+            return {
+                "success": True,
+                "files": all_files,
+                "directory": directory,
+                "temp_files_count": len(temp_files),
+                "sandbox_files_count": len(sandbox_files),
+                "session_active": session_active,
+                "warning": None if session_active else "Sandbox file access unavailable, showing temp files only"
+            }
+            
+        except Exception as e:
+            # 最终后备方案：总是返回临时文件
+            print(f"文件列表获取异常: {e}")
+            return {
+                "success": True,
+                "warning": f"File listing error: {str(e)}, showing temp files only",
+                "files": temp_files,
+                "directory": directory,
+                "temp_files_count": len(temp_files),
+                "sandbox_files_count": 0,
+                "session_active": False
+            }
     
     def download_sandbox_file(self, file_path):
         """下载沙盒中的文件或本地临时文件"""
@@ -612,8 +622,128 @@ class E2BUnifiedAgent:
                 self._initialized = False
                 # 清空临时文件列表
                 self._temp_files = []
+                # 重置接管状态
+                self.takeover_active = False
+                self.intervention_needed = False
+                self.intervention_reason = ""
+                self.automation_paused = False
                 return {"success": True, "message": "Desktop session terminated"}
             else:
                 return {"success": True, "message": "No active session to terminate"}
         except Exception as e:
             return {"success": False, "error": str(e)}
+    
+    def enable_takeover(self):
+        """启用人工接管模式，设置view_only=True"""
+        try:
+            if not self.desktop_manager or not self.desktop_manager.desk:
+                return {
+                    "success": False,
+                    "error": "No active desktop session",
+                    "message": "请先创建桌面会话"
+                }
+            
+            # 设置view_only=True，允许用户手动操作
+            if hasattr(self.desktop_manager, 'set_view_only'):
+                self.desktop_manager.set_view_only(True)
+            
+            # 更新状态
+            self.takeover_active = True
+            self.automation_paused = True
+            
+            # 获取新的stream URL（如果需要）
+            try:
+                new_stream_url = self.desktop_manager.desk.stream.get_url(
+                    auth_key=self.desktop_manager.desk.stream.get_auth_key(),
+                    view_only=True  # 用户可以操作
+                )
+                self.stream_url = new_stream_url
+            except Exception as e:
+                print(f"更新stream URL失败: {e}")
+            
+            print("🎮 人工接管模式已启用，用户可以手动操作")
+            
+            return {
+                "success": True,
+                "message": "人工接管模式已启用，您现在可以手动操作桌面",
+                "takeover_active": True,
+                "stream_url": self.stream_url,
+                "instruction": "请在桌面上完成密码输入或验证码验证，完成后点击 '结束接管' 恢复自动化"
+            }
+            
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e),
+                "message": f"启用人工接管失败: {str(e)}"
+            }
+    
+    def disable_takeover(self):
+        """禁用人工接管模式，设置view_only=False"""
+        try:
+            if not self.desktop_manager or not self.desktop_manager.desk:
+                return {
+                    "success": False,
+                    "error": "No active desktop session",
+                    "message": "没有活动的桌面会话"
+                }
+            
+            # 设置view_only=False，切换回只读模式
+            if hasattr(self.desktop_manager, 'set_view_only'):
+                self.desktop_manager.set_view_only(False)
+            
+            # 更新状态
+            self.takeover_active = False
+            self.automation_paused = False
+            self.intervention_needed = False
+            self.intervention_reason = ""
+            
+            # 获取新的stream URL（只读模式）
+            try:
+                new_stream_url = self.desktop_manager.desk.stream.get_url(
+                    auth_key=self.desktop_manager.desk.stream.get_auth_key(),
+                    view_only=False  # 只读模式
+                )
+                self.stream_url = new_stream_url
+            except Exception as e:
+                print(f"更新stream URL失败: {e}")
+            
+            print("🤖 自动化模式已恢复，用户无法手动操作")
+            
+            return {
+                "success": True,
+                "message": "已恢复自动化模式，人工接管结束",
+                "takeover_active": False,
+                "stream_url": self.stream_url,
+                "instruction": "现在可以继续使用聊天界面发送自动化指令"
+            }
+            
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e),
+                "message": f"禁用人工接管失败: {str(e)}"
+            }
+    
+    def get_takeover_status(self):
+        """获取当前接管状态"""
+        return {
+            "takeover_active": self.takeover_active,
+            "intervention_needed": self.intervention_needed,
+            "intervention_reason": self.intervention_reason,
+            "automation_paused": self.automation_paused,
+            "session_active": bool(self.desktop_manager and self.desktop_manager.desk),
+            "stream_url": self.stream_url
+        }
+    
+    def clear_intervention_state(self):
+        """清除干预状态，但保持接管模式"""
+        self.intervention_needed = False
+        self.intervention_reason = ""
+        return {
+            "success": True,
+            "message": "干预状态已清除",
+            "intervention_needed": False,
+            "takeover_active": self.takeover_active
+        }
+    

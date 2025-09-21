@@ -120,8 +120,8 @@ class BrowseUseExecutor:
 
     def run(self):
         """连接远端 CDP，执行写死任务。"""
-        if not os.getenv("OPENAI_API_KEY"):
-            raise RuntimeError("缺少 OPENAI_API_KEY，请先 export OPENAI_API_KEY=sk-xxxx")
+        if not self.api_key or self.api_key.startswith("sk-your-") or len(self.api_key) < 20:
+            raise RuntimeError(f"无效的 OPENAI_API_KEY: {self.api_key[:20]}... \n请在.env文件中设置有效的API密钥或使用: export OPENAI_API_KEY=sk-xxxx")
 
         # 延迟导入，避免无关环境报错
         from browser_use import Agent, Browser
@@ -135,10 +135,12 @@ class BrowseUseExecutor:
             temperature=0
         )
         
-        # 创建Browser实例，使用稳定的基础配置
+        # 创建Browser实例，启用highlight功能
         browser = Browser(
             cdp_url=ws,
-            devtools=False
+            devtools=False,
+            highlight_elements=True,  # 启用高亮功能，显示元素操作
+            flash_mode=True
         )
         agent = Agent(
             task=self.task, 
@@ -165,7 +167,12 @@ class BrowseUseExecutor:
                     # 重新获取WebSocket端点
                     try:
                         ws = self.fetch_ws_endpoint()
-                        browser = Browser(cdp_url=ws)
+                        browser = Browser(
+                            cdp_url=ws, 
+                            highlight_elements=True, 
+                            flash_mode=True
+                        )
+                        
                         agent = Agent(
                             task=self.task, 
                             llm=llm, 
