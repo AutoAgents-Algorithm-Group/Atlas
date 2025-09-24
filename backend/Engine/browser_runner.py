@@ -139,13 +139,13 @@ class BrowseUseExecutor:
         browser = Browser(
             cdp_url=ws,
             devtools=False,
-            highlight_elements=True,  # 启用高亮功能，显示元素操作
-            flash_mode=True
+            highlight_elements=True  # 启用高亮功能，显示元素操作
         )
         agent = Agent(
             task=self.task, 
             llm=llm, 
-            browser=browser
+            browser=browser,
+            flash_mode=True
         )
 
         print(f"\n>>> 开始执行任务：{self.task}\n")
@@ -169,14 +169,14 @@ class BrowseUseExecutor:
                         ws = self.fetch_ws_endpoint()
                         browser = Browser(
                             cdp_url=ws, 
-                            highlight_elements=True, 
-                            flash_mode=True
+                            highlight_elements=True
                         )
                         
                         agent = Agent(
                             task=self.task, 
                             llm=llm, 
-                            browser=browser
+                            browser=browser,
+                            flash_mode=True
                         )
                     except Exception as reconnect_error:
                         print(f"重连失败: {reconnect_error}")
