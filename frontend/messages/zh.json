@@ -46,6 +46,26 @@
     "command": "命令",
     "file": "文件"
   },
+  "takeover": {
+    "enable": "接管控制",
+    "disable": "释放控制",
+    "enabling": "正在接管...",
+    "disabling": "正在释放...",
+    "enabled": "手动控制中",
+    "disabled": "AI 控制中",
+    "tooltip": {
+      "enable": "接管浏览器手动控制",
+      "disable": "将控制权返回给 AI",
+      "enabled": "您正在手动控制 - 点击返回 AI 控制",
+      "disabled": "AI 正在控制 - 点击接管控制"
+    },
+    "messages": {
+      "enableSuccess": "手动控制已启用，您现在可以直接操作浏览器。",
+      "disableSuccess": "AI 控制已恢复，自动化将继续进行。",
+      "enableError": "启用手动控制失败",
+      "disableError": "返回 AI 控制失败"
+    }
+  },
   "quickMessages": [
     "打开 Google 并搜索人工智能",
     "访问 GitHub 并浏览热门项目",

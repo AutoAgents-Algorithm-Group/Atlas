@@ -44,8 +44,8 @@ async def main():
 	agent = Agent(
 		task='Search for the latest news about AI',
 		llm=ChatOpenAI(
-            model='gemini-2.5-pro',
-            base_url="https://apihk.unifyllm.top/v1/messages",
+            model='claude-sonnet-4-20250514',
+            base_url="https://apihk.unifyllm.top/v1/chat/completions",
             api_key="sk-kGlFBKwr3YQieh9dtWAF0hgkaLV7UcmJA1xJ9qZXOOQfvura"
             )
 	)

@@ -46,6 +46,26 @@
     "command": "Command",
     "file": "File"
   },
+  "takeover": {
+    "enable": "Take Over",
+    "disable": "Release Control",
+    "enabling": "Taking Over...",
+    "disabling": "Releasing...",
+    "enabled": "Manual Control Active",
+    "disabled": "AI Control Active",
+    "tooltip": {
+      "enable": "Take manual control of the browser",
+      "disable": "Return control to AI",
+      "enabled": "You are in control - click to return to AI",
+      "disabled": "AI is in control - click to take over"
+    },
+    "messages": {
+      "enableSuccess": "Manual control enabled. You can now operate the browser directly.",
+      "disableSuccess": "AI control restored. The automation will continue.",
+      "enableError": "Failed to enable manual control",
+      "disableError": "Failed to return control to AI"
+    }
+  },
   "quickMessages": [
     "Open Google and search for artificial intelligence",
     "Visit GitHub and browse trending projects", 

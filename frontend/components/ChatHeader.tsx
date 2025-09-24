@@ -4,12 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Computer, Share, Download, FileText, Loader2, User, Settings, LogOut, Sparkles, ChevronRight, RefreshCw, Brain, Home, HelpCircle, ExternalLink } from 'lucide-react';
+import { Computer, Share, Download, FileText, Loader2, User, Settings, LogOut, Sparkles, ChevronRight, RefreshCw, Brain, Home, HelpCircle, ExternalLink, Hand, UserCheck, AlertCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useTranslations, useLocale } from 'next-intl';
 import { useRouter, usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import ProfileDialog from './ProfileDialog';
 
 interface SandboxFile {
@@ -45,6 +46,12 @@ export default function ChatHeader({
   
   // Dialog状态管理
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
+  
+  // Takeover状态管理
+  const [takeoverState, setTakeoverState] = useState({
+    isActive: false,
+    isLoading: false
+  });
 
   const handleLanguageChange = (newLocale: string) => {
     try {
@@ -77,6 +84,80 @@ export default function ChatHeader({
       window.location.href = fallbackPath;
     }
   };
+
+  // API基础URL配置
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8100';
+
+  // Takeover相关功能
+  const checkTakeoverStatus = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/api/takeover/status`);
+      const data = await response.json();
+      if (data.success) {
+        setTakeoverState(prev => ({
+          ...prev,
+          isActive: data.data.takeover_active || false
+        }));
+      }
+    } catch (error) {
+      console.error('检查takeover状态失败:', error);
+    }
+  };
+
+  const toggleTakeover = async () => {
+    if (!isActive) {
+      toast.error(t('messages.createSessionFirst'));
+      return;
+    }
+
+    setTakeoverState(prev => ({ ...prev, isLoading: true }));
+
+    try {
+      const endpoint = takeoverState.isActive ? `${API_BASE}/api/takeover/disable` : `${API_BASE}/api/takeover/enable`;
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setTakeoverState(prev => ({
+          ...prev,
+          isActive: !prev.isActive,
+          isLoading: false
+        }));
+        
+        // 显示成功消息
+        const message = takeoverState.isActive 
+          ? t('takeover.messages.disableSuccess')
+          : t('takeover.messages.enableSuccess');
+        
+        toast.success(message);
+      } else {
+        throw new Error(data.message || data.error);
+      }
+    } catch (error) {
+      console.error('Takeover操作失败:', error);
+      const errorMessage = takeoverState.isActive 
+        ? t('takeover.messages.disableError')
+        : t('takeover.messages.enableError');
+      toast.error(`${errorMessage}: ${error.message}`);
+      
+      setTakeoverState(prev => ({ ...prev, isLoading: false }));
+    }
+  };
+
+  // 定期检查takeover状态
+  useEffect(() => {
+    if (isActive) {
+      checkTakeoverStatus();
+      const interval = setInterval(checkTakeoverStatus, 5000); // 每5秒检查一次
+      return () => clearInterval(interval);
+    }
+  }, [isActive]);
 
   return (
     <div className="h-16 px-6 flex items-center justify-between bg-[#faf9f6]">
@@ -296,6 +377,39 @@ export default function ChatHeader({
           </DialogContent>
         </Dialog>
         
+        {/* Takeover Button */}
+        <Button
+          onClick={toggleTakeover}
+          disabled={!isActive || takeoverState.isLoading}
+          variant={takeoverState.isActive ? "default" : "outline"}
+          className={`cursor-pointer ${
+            takeoverState.isActive 
+              ? 'bg-orange-500 hover:bg-orange-600 text-white' 
+              : ''
+          }`}
+          size="sm"
+          title={
+            takeoverState.isActive 
+              ? t('takeover.tooltip.enabled')
+              : t('takeover.tooltip.disabled')
+          }
+        >
+          {takeoverState.isLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : takeoverState.isActive ? (
+            <UserCheck className="h-4 w-4" />
+          ) : (
+            <Hand className="h-4 w-4" />
+          )}
+          <span className="ml-1 text-xs">
+            {takeoverState.isLoading ? (
+              takeoverState.isActive ? t('takeover.disabling') : t('takeover.enabling')
+            ) : (
+              takeoverState.isActive ? t('takeover.disable') : t('takeover.enable')
+            )}
+          </span>
+        </Button>
+
         {/* Share Button */}
         <Button variant="outline" className='cursor-pointer' size="sm">
           <Share className="h-4 w-4" />

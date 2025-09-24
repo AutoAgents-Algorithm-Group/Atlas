@@ -20,7 +20,7 @@ class E2BDesktopManager:
         "--no-first-run",                   # 禁用首次运行检查
         "--no-default-browser-check",       # 禁用默认浏览器检查
         "--start-maximized",                # 让Chrome窗口启动时自动最大化
-        "--kiosk",                          # 让Chrome窗口启动时自动全屏
+        # "--kiosk",                          # 让Chrome窗口启动时自动全屏
         "--disable-infobars",               # 禁用Chrome的信息提示栏
         "--disable-extensions",             # 禁用扩展程序以减少界面元素
         "--disable-dev-shm-usage",          # 解决共享内存相关问题

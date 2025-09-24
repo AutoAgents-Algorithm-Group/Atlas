@@ -15,9 +15,9 @@ class BrowseUseExecutor:
         self.task = task
         self.external_cdp_base = external_cdp_base.rstrip("/")
         self.backup_chrome_base = backup_chrome_base.rstrip("/") if backup_chrome_base else None
-        self.model = model or os.getenv("BROWSER_USE_MODEL", "gemini-2.5-pro")
-        self.base_url = os.getenv("OPENAI_BASE_URL", "https://api.tu-zi.com/v1")
-        self.api_key = os.getenv("OPENAI_API_KEY", "sk-9mRo0HPml7rUWwpQsal5Ve7CWx65Q7gxkF95a6QLxzfXarKi")
+        self.model = model or os.getenv("BROWSER_USE_MODEL", "claude-sonnet-4-20250514")
+        self.base_url = os.getenv("OPENAI_BASE_URL", "https://apihk.unifyllm.top/v1")
+        self.api_key = os.getenv("OPENAI_API_KEY", "sk-kGlFBKwr3YQieh9dtWAF0hgkaLV7UcmJA1xJ9qZXOOQfvura")
 
     @staticmethod
     def _http_get(url: str, timeout: int = 10) -> str:
@@ -145,7 +145,8 @@ class BrowseUseExecutor:
             task=self.task, 
             llm=llm, 
             browser=browser,
-            flash_mode=True
+            flash_mode=True,
+            step_timeout=300
         )
 
         print(f"\n>>> 开始执行任务：{self.task}\n")
